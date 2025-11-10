@@ -1,0 +1,2193 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>运动计时器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            position: relative;
+        }
+        
+        h1 {
+            margin-bottom: 20px;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .current-time {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: #fdbb2d;
+        }
+        
+        .timer-status-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            position: relative;
+            width: 100%;
+        }
+        
+        .timer-status {
+            font-size: 1.2rem;
+            color: #4CAF50;
+            font-weight: bold;
+            transition: all 0.3s;
+            flex: 1;
+            text-align: center;
+        }
+        
+        .timer-status.pulsing {
+            animation: pulse 1.5s infinite;
+        }
+        
+        .progress-indicator {
+            background-color: rgba(253, 187, 45, 0.8);
+            color: #333;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            min-width: 50px;
+            flex: 0;
+        }
+        
+        .next-phase-indicator {
+            font-size: 1.2rem;
+            color: #aaa;
+            font-weight: bold;
+            flex: 1;
+            text-align: center;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .phase-info {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            position: relative;
+            height: 400px;
+            overflow: hidden;
+        }
+        
+        .phase-left {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .phase-right {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+        }
+        
+        .phase-carousel {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        
+        .phase-carousel-track {
+            display: flex;
+            transition: transform 0.5s ease;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .phase-carousel-item {
+            flex: 0 0 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+            transition: all 0.5s ease;
+            opacity: 0.3;
+            transform: scale(0.8);
+        }
+        
+        .phase-carousel-item.prev {
+            opacity: 0.6;
+            transform: scale(0.9);
+        }
+        
+        .phase-carousel-item.active {
+            opacity: 1;
+            transform: scale(1);
+        }
+        
+        .phase-carousel-item.next {
+            opacity: 0.6;
+            transform: scale(0.9);
+        }
+        
+        .phase-name {
+            font-size: 2.2rem;
+            color: #fdbb2d;
+            margin-bottom: 10px;
+        }
+        
+        .phase-description {
+            font-size: 1rem;
+            color: #aaa;
+            margin-bottom: 15px;
+        }
+        
+        .phase-timer {
+            font-size: 9rem;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            line-height: 1;
+            margin-bottom: 10px;
+        }
+        
+        .phase-timer-label {
+            font-size: 1.2rem;
+            color: #aaa;
+        }
+        
+        .completion-message {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #4CAF50;
+            text-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+            line-height: 1.2;
+            margin-bottom: 20px;
+            animation: celebration 2s infinite;
+        }
+        
+        @keyframes celebration {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .carousel-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #fdbb2d;
+            font-size: 1.8rem;
+            cursor: pointer;
+            z-index: 10;
+            transition: all 0.3s;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+        
+        .carousel-prev {
+            left: 5px;
+        }
+        
+        .carousel-next {
+            right: 5px;
+        }
+        
+        .carousel-nav-vertical {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            background: none;
+            border: none;
+            color: #fdbb2d;
+            font-size: 1.8rem;
+            cursor: pointer;
+            z-index: 10;
+            transition: all 0.3s;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+        
+        .carousel-nav-vertical:hover {
+            background-color: rgba(253, 187, 45, 0.2);
+        }
+        
+        .carousel-prev-vertical {
+            top: 5px;
+        }
+        
+        .carousel-next-vertical {
+            bottom: 5px;
+        }
+        
+        .total-timer-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 20px 0;
+        }
+        
+        .start-time, .end-time {
+            font-size: 1.2rem;
+            color: #aaa;
+            flex: 1;
+        }
+        
+        .start-time {
+            text-align: left;
+        }
+        
+        .end-time {
+            text-align: right;
+        }
+        
+        .total-timer {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #4CAF50;
+            flex: 2;
+            text-align: center;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+        
+        .main-controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        button {
+            padding: 12px 25px;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+            min-width: 120px;
+        }
+        
+        #startBtn {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        #pauseBtn {
+            background-color: #FFC107;
+            color: black;
+        }
+        
+        #resetBtn {
+            background-color: #F44336;
+            color: white;
+        }
+        
+        button:active {
+            transform: translateY(1px);
+        }
+        
+        button:disabled {
+            background-color: #cccccc;
+            color: #666666;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        /* 设置按钮样式 */
+        .settings-buttons {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .settings-btn {
+            padding: 5px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 20px;
+            color: white;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            width: 25px;
+            height: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .settings-btn:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .top-right-buttons {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        /* 模态框样式 - 优化版 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background: linear-gradient(145deg, #2c2c2c, #1f1f1f);
+            border-radius: 15px;
+            width: 90%;
+            max-width: 600px;
+            text-align: center;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            border: 1px solid #444;
+        }
+        
+        .modal-header {
+            background: linear-gradient(145deg, #3a3a3a, #2a2a2a);
+            padding: 20px 30px;
+            border-radius: 15px 15px 0 0;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            border-bottom: 1px solid #555;
+        }
+        
+        .modal h2 {
+            margin-bottom: 20px;
+            color: #fdbb2d;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+        }
+        
+        .modal-body {
+            padding: 0 30px 30px;
+        }
+        
+        .modal label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+            text-align: left;
+            color: #e0e0e0;
+        }
+        
+        .modal input, .modal select {
+            width: 100%;
+            padding: 10px;
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            border: 1px solid #555;
+            background-color: #444;
+            color: white;
+            transition: all 0.3s;
+        }
+        
+        .modal input:focus, .modal select:focus {
+            outline: none;
+            border-color: #fdbb2d;
+            box-shadow: 0 0 5px rgba(253, 187, 45, 0.5);
+        }
+        
+        .modal-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .modal button {
+            min-width: 100px;
+            background: linear-gradient(145deg, #fdbb2d, #e6a720);
+            color: #333;
+            border: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .modal button:hover {
+            background: linear-gradient(145deg, #ffc845, #f0b52a);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        /* 准备倒计时样式 */
+        .countdown-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s, visibility 0.5s;
+        }
+        
+        .countdown-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .countdown-number {
+            font-size: 20rem;
+            color: #fdbb2d;
+            text-shadow: 0 0 20px rgba(253, 187, 45, 0.8);
+            font-weight: bold;
+            animation: pulse 1s infinite;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        /* 阶段编辑项样式 - 优化版 */
+        .phase-edit-item {
+            margin-bottom: 15px;
+            padding: 15px;
+            background: linear-gradient(145deg, #3a3a3a, #2a2a2a);
+            border-radius: 10px;
+            text-align: left;
+            border: 1px solid #444;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .phase-edit-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .phase-edit-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #fdbb2d;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .phase-duration-display {
+            color: #aaa;
+            font-weight: normal;
+            font-size: 0.9rem;
+        }
+        
+        .toggle-btn {
+            background: none;
+            border: none;
+            color: #fdbb2d;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 5px;
+            transition: transform 0.3s;
+        }
+        
+        .toggle-btn:hover {
+            transform: scale(1.1);
+        }
+        
+        .phase-edit-content {
+            margin-top: 15px;
+            display: none;
+        }
+        
+        .phase-edit-content.show {
+            display: block;
+        }
+        
+        .phase-edit-content label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 1rem;
+            color: #e0e0e0;
+        }
+        
+        .phase-edit-content input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border: 1px solid #555;
+            background-color: #444;
+            color: white;
+            transition: all 0.3s;
+        }
+        
+        .phase-edit-content input:focus {
+            outline: none;
+            border-color: #fdbb2d;
+            box-shadow: 0 0 5px rgba(253, 187, 45, 0.5);
+        }
+        
+        .delete-phase-btn {
+            background: linear-gradient(145deg, #F44336, #d32f2f);
+            margin-top: 10px;
+            padding: 8px 15px;
+            min-width: auto;
+            color: white;
+        }
+        
+        /* 语音设置表格样式 - 优化版 */
+        .tts-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            background: linear-gradient(145deg, #3a3a3a, #2a2a2a);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .tts-table th, .tts-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #444;
+        }
+        
+        .tts-table th {
+            background: linear-gradient(145deg, #4a4a4a, #3a3a3a);
+            color: #fdbb2d;
+            font-weight: bold;
+        }
+        
+        .tts-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .tts-table input, .tts-table select {
+            width: 100%;
+            padding: 8px;
+            background-color: #444;
+            border: 1px solid #555;
+            color: white;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+        
+        .tts-table input:focus, .tts-table select:focus {
+            outline: none;
+            border-color: #fdbb2d;
+            box-shadow: 0 0 5px rgba(253, 187, 45, 0.5);
+        }
+        
+        .tts-table button {
+            padding: 6px 12px;
+            min-width: auto;
+            font-size: 0.9rem;
+            background: linear-gradient(145deg, #F44336, #d32f2f);
+            color: white;
+        }
+        
+        .add-tts-btn {
+            background: linear-gradient(145deg, #4CAF50, #388E3C);
+            margin-bottom: 10px;
+            color: white;
+        }
+        
+        .tts-voice-controls {
+            display: none;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            background: linear-gradient(145deg, #3a3a3a, #2a2a2a);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #444;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .tts-voice-controls.show {
+            display: flex;
+        }
+        
+        .tts-voice-control {
+            flex: 1;
+            min-width: 150px;
+        }
+        
+        .tts-voice-control label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+            color: #e0e0e0;
+        }
+        
+        .tts-test-btn {
+            background: linear-gradient(145deg, #2196F3, #1976D2);
+            margin-bottom: 15px;
+            color: white;
+        }
+        
+        .toggle-voice-settings-btn {
+            background: linear-gradient(145deg, #9C27B0, #7B1FA2);
+            margin-bottom: 15px;
+            color: white;
+        }
+        
+        /* 移动端优化 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+                border-radius: 15px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            .startTimeLeft {
+                display: none;
+            }
+            .endTimeRight {
+                display: none;
+            }
+            .timer-status-container {
+                flex-direction: row;
+                gap: 10px;
+            }
+            
+            .progress-indicator {
+                margin-top: 5px;
+            }
+            
+            .next-phase-indicator {
+                margin-top: 5px;
+                text-align: center;
+            }
+            
+            .phase-info {
+                flex-direction: column;
+                height: auto;
+            }
+            
+            .phase-left, .phase-right {
+                width: 100%;
+                height: auto;
+            }
+            
+            .phase-name {
+                font-size: 1.8rem;
+            }
+            
+            .phase-timer {
+                font-size: 8.5rem;
+            }
+            
+            .completion-message {
+                font-size: 2.5rem;
+            }
+            
+            .total-timer-container {
+                flex-direction: column;
+                gap: 5px;
+            }
+            
+            .total-timer {
+                font-size: 2rem;
+                order: -1;
+            }
+            
+            .start-time, .end-time {
+                font-size: 1rem;
+                width: 100%;
+                text-align: center;
+            }
+            
+            /* 移动端时间显示在一行 */
+            .time-row {
+                display: flex;
+                justify-content: space-between;
+                width: 100%;
+                margin-top: 5px;
+            }
+            
+            button {
+                padding: 10px 15px;
+                font-size: 1rem;
+                min-width: 100px;
+            }
+            
+            .settings-btn {
+                min-width: 50px;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .main-controls {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            /* 移动端倒计时字体大小调整 */
+            .countdown-number {
+                font-size: 15rem;
+            }
+            
+            /* 移动端设置按钮位置调整 - 确保左上角和右上角 */
+            .settings-buttons {
+                position: absolute;
+                top: 15px;
+                left: 15px;
+            }
+            
+            .top-right-buttons {
+                position: absolute;
+                top: 15px;
+                right: 15px;
+            }
+            
+            /* 移动端模态框调整 */
+            .modal-content {
+                padding: 0;
+            }
+            
+            .modal-header {
+                padding: 15px 20px;
+            }
+            
+            .modal-body {
+                padding: 0 20px 20px;
+            }
+            
+            .modal-buttons {
+                flex-wrap: wrap;
+            }
+            
+            .tts-voice-controls {
+                flex-direction: column;
+            }
+            
+            /* 移动端轮盘导航按钮隐藏垂直方向，显示水平方向 */
+            .carousel-nav-vertical {
+                display: none;
+            }
+            
+            .carousel-nav {
+                display: block;
+            }
+        }
+        
+        @media (min-width: 769px) {
+            /* 桌面端轮盘导航按钮隐藏水平方向，显示垂直方向 */
+            .carousel-nav {
+                display: none;
+            }
+            
+            .carousel-nav-vertical {
+                display: flex;
+            }
+            
+            .phase-carousel-track {
+                flex-direction: column;
+                height: 100%;
+            }
+            
+            .phase-carousel-item {
+                flex: 0 0 100%;
+                height: 100%;
+            }
+            
+            /* 宽屏时，开始时间和结束时间分别在总时间的左边和右边 */
+            .total-timer-container {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+            
+            .start-time {
+                text-align: left;
+                flex: 1;
+            }
+            
+            .end-time {
+                text-align: right;
+                flex: 1;
+            }
+            
+            .total-timer {
+                flex: 2;
+                text-align: center;
+            }
+            
+            /* 移除移动端的时间行样式 */
+            .time-row {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .phase-timer {
+                font-size: 5rem;
+            }
+            .startTimeLeft {
+                display: none;
+            }
+            .endTimeRight {
+                display: none;
+            }
+            
+            .completion-message {
+                font-size: 2rem;
+            }
+            
+            .countdown-number {
+                font-size: 12rem;
+            }
+            
+            .phase-name {
+                font-size: 1.5rem;
+            }
+            
+            .phase-description {
+                font-size: 0.9rem;
+            }
+            
+            .total-timer {
+                font-size: 1.8rem;
+            }
+            
+            .controls {
+                gap: 10px;
+            }
+            
+            .main-controls {
+                gap: 10px;
+            }
+            
+            button {
+                padding: 10px 12px;
+                min-width: 90px;
+                font-size: 0.9rem;
+            }
+            
+            .settings-btn {
+                min-width: 10px;
+            }
+            
+            .start-time, .end-time {
+                font-size: 0.9rem;
+            }
+            
+            .tts-table {
+                font-size: 0.8rem;
+            }
+            
+            .tts-table th, .tts-table td {
+                padding: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="settings-buttons">
+            <button class="settings-btn" id="editPhasesBtn" title="编辑阶段">✏️</button>
+        </div>
+        
+        <div class="top-right-buttons">
+            <button class="settings-btn" id="ttsSettingsBtn" title="语音设置">🔊</button>
+        </div>
+        
+        <div class="current-time" id="currentTime">当前时间: --:--:--</div>
+        
+        <div class="timer-status-container">
+            <div class="timer-status" id="timerStatus">未开始</div>
+            <div class="progress-indicator" id="progressIndicator">1/7</div>
+            <div class="next-phase-indicator" id="nextPhaseIndicator">→休息时间</div>
+        </div>
+        
+        <div class="phase-info">
+            <div class="phase-left">
+                <div class="phase-carousel">
+                    <button class="carousel-nav carousel-prev" id="carouselPrev">◀</button>
+                    <button class="carousel-nav carousel-next" id="carouselNext">▶</button>
+                    
+                    <button class="carousel-nav-vertical carousel-prev-vertical" id="carouselPrevVertical">▲</button>
+                    <button class="carousel-nav-vertical carousel-next-vertical" id="carouselNextVertical">▼</button>
+                    
+                    <div class="phase-carousel-track" id="phaseCarouselTrack">
+                        <!-- 阶段内容将通过JavaScript动态生成 -->
+                    </div>
+                </div>
+            </div>
+            
+            <div class="phase-right">
+                <div class="phase-timer" id="phaseTimer">00:00</div>
+                <div class="phase-timer-label">阶段倒计时</div>
+            </div>
+        </div>
+        
+        <div class="total-timer-container">
+            <div class="start-time startTimeLeft" id="startTime">开始时间: --:--:--</div>
+            <div class="total-timer" id="totalTimer">总时间: 00:00:00</div>
+            <div class="end-time endTimeRight" id="endTime">结束时间: --:--:--</div>
+            <!-- 移动端使用的时间行 -->
+            <div class="time-row">
+                <div class="start-time" id="startTimeMobile">开始时间: --:--:--</div>
+                <div class="end-time" id="endTimeMobile">结束时间: --:--:--</div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <div class="main-controls">
+                <button id="startBtn">开始</button>
+                <button id="pauseBtn" disabled>暂停</button>
+                <button id="resetBtn" disabled>重置</button>
+            </div>
+        </div>
+        
+    </div>
+
+    <!-- 准备倒计时覆盖层 -->
+    <div class="countdown-overlay" id="countdownOverlay">
+        <div class="countdown-number" id="countdownNumber">3</div>
+    </div>
+
+    <!-- 编辑阶段模态框 -->
+    <div class="modal" id="editPhasesModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>编辑训练阶段</h2>
+                <div class="modal-buttons">
+                    <button id="addPhaseBtn">添加阶段</button>
+                    <button id="savePhasesBtn">保存</button>
+                    <button id="cancelPhasesEditBtn">取消</button>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div id="phasesEditContainer">
+                    <!-- 阶段编辑内容将通过JavaScript动态生成 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 语音设置模态框 -->
+    <div class="modal" id="ttsSettingsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>语音提示设置</h2>
+                <div class="modal-buttons">
+                    <button id="toggleVoiceSettingsBtn" class="toggle-voice-settings-btn">显示语音设置</button>
+                    <button id="addTtsBtn">添加语音提示</button>
+                    <button id="saveTtsBtn">保存</button>
+                    <button id="cancelTtsBtn">取消</button>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div class="tts-voice-controls" id="ttsVoiceControls">
+                    <div class="tts-voice-control">
+                        <label for="ttsVoice">音色:</label>
+                        <select id="ttsVoice">
+                            <option value="">默认音色</option>
+                        </select>
+                    </div>
+                    <div class="tts-voice-control">
+                        <label for="ttsPitch">音调 (0.5-2):</label>
+                        <input type="range" id="ttsPitch" min="0.5" max="2" step="0.1" value="1">
+                        <span id="ttsPitchValue">1.0</span>
+                    </div>
+                    <div class="tts-voice-control">
+                        <label for="ttsRate">语速 (0.5-2):</label>
+                        <input type="range" id="ttsRate" min="0.5" max="2" step="0.1" value="1">
+                        <span id="ttsRateValue">1.0</span>
+                    </div>
+                    <div class="tts-voice-control">
+                        <button id="ttsTestBtn" class="tts-test-btn">测试语音</button>
+                    </div>
+                </div>
+                
+                <p>设置在不同阶段和时间点播放的语音提示</p>
+                
+                <table class="tts-table" id="ttsTable">
+                    <thead>
+                        <tr>
+                            <th>阶段</th>
+                            <th>时间点(秒)</th>
+                            <th>语音内容</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ttsTableBody">
+                        <!-- 语音提示内容将通过JavaScript动态生成 -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 定义训练阶段 - 将训练完成作为最后一个阶段
+        const phases = [
+            { name: "热身阶段", duration: 15 * 60, description: "准备活动，提高心率" },
+            { name: "休息时间", duration: 2 * 60, description: "短暂休息" },
+            { name: "拳击训练", duration: 30 * 60, description: "高强度拳击练习" },
+            { name: "休息时间", duration: 3 * 60, description: "恢复体力" },
+            { name: "力量训练", duration: 30 * 60, description: "增强肌肉力量" },
+            { name: "休息时间", duration: 2 * 60, description: "短暂休息" },
+            { name: "放松拉伸", duration: 10 * 60, description: "缓解肌肉紧张" },
+            { name: "训练完成", duration: 0, description: "恭喜完成训练！太棒啦！", isCompletion: true }
+        ];
+
+        // 定义文本转语音设置
+        let ttsSettings = [
+            { phaseId: 0, timePoint: 10, text: "热身阶段即将结束，请准备休息" },
+            { phaseId: 2, timePoint: 60, text: "拳击训练已进行一分钟" },
+            { phaseId: 2, timePoint: 300, text: "拳击训练已进行五分钟" },
+            { phaseId: 4, timePoint: 60, text: "力量训练已进行一分钟" },
+            { phaseId: 6, timePoint: 30, text: "放松拉伸即将结束，训练即将完成" }
+        ];
+
+        // 获取DOM元素
+        const currentTimeElement = document.getElementById('currentTime');
+        const timerStatusElement = document.getElementById('timerStatus');
+        const progressIndicatorElement = document.getElementById('progressIndicator');
+        const nextPhaseIndicatorElement = document.getElementById('nextPhaseIndicator');
+        const totalTimerElement = document.getElementById('totalTimer');
+        const phaseTimerElement = document.getElementById('phaseTimer');
+        const startBtn = document.getElementById('startBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const startTimeElement = document.getElementById('startTime');
+        const endTimeElement = document.getElementById('endTime');
+        const startTimeMobileElement = document.getElementById('startTimeMobile');
+        const endTimeMobileElement = document.getElementById('endTimeMobile');
+        
+        // 轮盘元素
+        const phaseCarouselTrack = document.getElementById('phaseCarouselTrack');
+        const carouselPrev = document.getElementById('carouselPrev');
+        const carouselNext = document.getElementById('carouselNext');
+        const carouselPrevVertical = document.getElementById('carouselPrevVertical');
+        const carouselNextVertical = document.getElementById('carouselNextVertical');
+        
+        // 设置按钮元素
+        const editPhasesBtn = document.getElementById('editPhasesBtn');
+        const ttsSettingsBtn = document.getElementById('ttsSettingsBtn');
+        
+        // 模态框相关元素
+        const editPhasesModal = document.getElementById('editPhasesModal');
+        const ttsSettingsModal = document.getElementById('ttsSettingsModal');
+        const phasesEditContainer = document.getElementById('phasesEditContainer');
+        const ttsTableBody = document.getElementById('ttsTableBody');
+        
+        // 模态框按钮
+        const addPhaseBtn = document.getElementById('addPhaseBtn');
+        const savePhasesBtn = document.getElementById('savePhasesBtn');
+        const cancelPhasesEditBtn = document.getElementById('cancelPhasesEditBtn');
+        const addTtsBtn = document.getElementById('addTtsBtn');
+        const saveTtsBtn = document.getElementById('saveTtsBtn');
+        const cancelTtsBtn = document.getElementById('cancelTtsBtn');
+        
+        // 语音设置元素
+        const ttsVoiceControls = document.getElementById('ttsVoiceControls');
+        const toggleVoiceSettingsBtn = document.getElementById('toggleVoiceSettingsBtn');
+        const ttsVoice = document.getElementById('ttsVoice');
+        const ttsPitch = document.getElementById('ttsPitch');
+        const ttsPitchValue = document.getElementById('ttsPitchValue');
+        const ttsRate = document.getElementById('ttsRate');
+        const ttsRateValue = document.getElementById('ttsRateValue');
+        const ttsTestBtn = document.getElementById('ttsTestBtn');
+        
+        // 新增：准备倒计时元素
+        const countdownOverlay = document.getElementById('countdownOverlay');
+        const countdownNumber = document.getElementById('countdownNumber');
+
+        // 初始化变量
+        let currentPhase = 0;
+        let totalSeconds = 0;
+        let phaseSeconds = phases[0].duration;
+        let isRunning = false;
+        let isPaused = false;
+        let timerInterval;
+        let currentTimeInterval;
+        let startTimestamp = null;
+        let endTimestamp = null;
+        let ttsVoiceSettings = {
+            voice: null,
+            pitch: 1,
+            rate: 1
+        };
+        
+        // 新增：音频上下文和音频缓存
+        let audioContext;
+        let tickSoundBuffer;
+        let warningSoundBuffer;
+        let celebrationSoundBuffer;
+        let audioInitialized = false;
+
+        // 初始化阶段轮盘显示
+        function initializePhaseCarousel() {
+            phaseCarouselTrack.innerHTML = '';
+            phases.forEach((phase, index) => {
+                const phaseItem = document.createElement('div');
+                phaseItem.className = 'phase-carousel-item';
+                phaseItem.id = `phase-carousel-${index}`;
+                
+                const phaseName = document.createElement('div');
+                phaseName.className = 'phase-name';
+                phaseName.textContent = phase.name;
+                
+                const phaseDescription = document.createElement('div');
+                phaseDescription.className = 'phase-description';
+                phaseDescription.textContent = phase.description;
+                
+                phaseItem.appendChild(phaseName);
+                phaseItem.appendChild(phaseDescription);
+                
+                phaseCarouselTrack.appendChild(phaseItem);
+            });
+            
+            // 设置当前阶段为激活状态
+            updateCarouselActivePhase();
+            updateNextPhaseIndicator();
+        }
+
+        // 更新轮盘当前激活阶段
+        function updateCarouselActivePhase() {
+            // 移除所有激活状态
+            document.querySelectorAll('.phase-carousel-item').forEach(item => {
+                item.classList.remove('active', 'prev', 'next');
+            });
+            
+            // 设置当前阶段为激活状态
+            const currentPhaseItem = document.getElementById(`phase-carousel-${currentPhase}`);
+            if (currentPhaseItem) {
+                currentPhaseItem.classList.add('active');
+            }
+            
+            // 如果不是完成阶段，设置前一个和后一个阶段
+            if (!phases[currentPhase].isCompletion) {
+                // 设置前一个阶段
+                const prevPhase = currentPhase > 0 ? currentPhase - 1 : phases.length - 1;
+                const prevPhaseItem = document.getElementById(`phase-carousel-${prevPhase}`);
+                if (prevPhaseItem) {
+                    prevPhaseItem.classList.add('prev');
+                }
+                
+                // 设置后一个阶段
+                const nextPhase = currentPhase < phases.length - 1 ? currentPhase + 1 : 0;
+                const nextPhaseItem = document.getElementById(`phase-carousel-${nextPhase}`);
+                if (nextPhaseItem) {
+                    nextPhaseItem.classList.add('next');
+                }
+            }
+            
+            // 更新轮盘位置
+            updateCarouselPosition();
+            
+            // 更新进度指示器
+            updateProgressIndicator();
+            
+            // 更新下一阶段指示器
+            updateNextPhaseIndicator();
+            
+            // 更新导航按钮显示状态
+            updateNavigationButtons();
+        }
+
+        // 更新导航按钮显示状态
+        function updateNavigationButtons() {
+            const isCompletionPhase = phases[currentPhase].isCompletion;
+            
+            // 如果是完成阶段，隐藏所有导航按钮
+            if (isCompletionPhase) {
+                carouselPrev.style.display = 'none';
+                carouselNext.style.display = 'none';
+                carouselPrevVertical.style.display = 'none';
+                carouselNextVertical.style.display = 'none';
+            } else {
+                // 根据屏幕宽度决定显示哪种导航按钮
+                const isMobile = window.innerWidth <= 768;
+                if (isMobile) {
+                    carouselPrev.style.display = 'flex';
+                    carouselNext.style.display = 'flex';
+                    carouselPrevVertical.style.display = 'none';
+                    carouselNextVertical.style.display = 'none';
+                } else {
+                    carouselPrev.style.display = 'none';
+                    carouselNext.style.display = 'none';
+                    carouselPrevVertical.style.display = 'flex';
+                    carouselNextVertical.style.display = 'flex';
+                }
+            }
+        }
+
+        // 更新下一阶段指示器
+        function updateNextPhaseIndicator() {
+            // 修复：如果是训练完成阶段，不显示箭头
+            if (phases[currentPhase].isCompletion) {
+                nextPhaseIndicatorElement.textContent = "已完成";
+            } else {
+                const nextPhaseIndex = currentPhase < phases.length - 1 ? currentPhase + 1 : 0;
+                nextPhaseIndicatorElement.textContent = `→${phases[nextPhaseIndex].name}`;
+            }
+        }
+
+        // 更新进度指示器
+        function updateProgressIndicator() {
+            // 训练完成阶段不计入进度
+            const totalPhasesForProgress = phases.length - 1;
+            
+            if (phases[currentPhase].isCompletion) {
+                progressIndicatorElement.textContent = `${totalPhasesForProgress}/${totalPhasesForProgress}`;
+            } else {
+                progressIndicatorElement.textContent = `${currentPhase + 1}/${totalPhasesForProgress}`;
+            }
+        }
+
+        // 更新轮盘位置
+        function updateCarouselPosition() {
+            const track = document.getElementById('phaseCarouselTrack');
+            const isMobile = window.innerWidth <= 768;
+            
+            if (isMobile) {
+                // 移动端：水平滚动
+                track.style.transform = `translateX(-${currentPhase * 100}%)`;
+            } else {
+                // 桌面端：垂直滚动
+                track.style.transform = `translateY(-${currentPhase * 100}%)`;
+            }
+        }
+
+        // 更新当前时间显示
+        function updateCurrentTime() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            currentTimeElement.textContent = `当前时间: ${hours}:${minutes}:${seconds}`;
+        }
+
+        // 更新计时器状态显示
+        function updateTimerStatus() {
+            if (!isRunning && !isPaused) {
+                timerStatusElement.textContent = "未开始";
+                timerStatusElement.style.color = "#FFC107";
+                timerStatusElement.classList.add('pulsing');
+            } else if (isPaused) {
+                timerStatusElement.textContent = "已暂停";
+                timerStatusElement.style.color = "#FF9800";
+                timerStatusElement.classList.add('pulsing');
+            } else {
+                timerStatusElement.textContent = "进行中";
+                timerStatusElement.style.color = "#4CAF50";
+                timerStatusElement.classList.remove('pulsing');
+            }
+        }
+
+        // 格式化时间显示
+        function formatTime(totalSeconds) {
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = totalSeconds % 60;
+            
+            if (hours > 0) {
+                return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            } else {
+                return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            }
+        }
+
+        // 更新阶段显示
+        function updatePhaseDisplay() {
+            // 更新总时间
+            totalTimerElement.textContent = `总时间: ${formatTime(totalSeconds)}`;
+            
+            // 更新当前阶段计时器
+            if (phases[currentPhase].isCompletion) {
+                // 完成阶段显示正计时
+                phaseTimerElement.textContent = formatTime(phaseSeconds);
+                phaseTimerElement.style.color = "#4CAF50";
+            } else {
+                // 其他阶段显示倒计时
+                phaseTimerElement.textContent = formatTime(phaseSeconds);
+                phaseTimerElement.style.color = "#fff";
+            }
+            
+            // 更新轮盘激活状态
+            updateCarouselActivePhase();
+        }
+
+        // 初始化音频系统
+        function initializeAudio() {
+            if (audioInitialized) return;
+            
+            try {
+                // 创建音频上下文
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                
+                // 创建轻快的滴答声
+                const tickLength = 0.05 * audioContext.sampleRate;
+                tickSoundBuffer = audioContext.createBuffer(1, tickLength, audioContext.sampleRate);
+                const tickData = tickSoundBuffer.getChannelData(0);
+                for (let i = 0; i < tickLength; i++) {
+                    // 使用更高的频率和更短的持续时间
+                    tickData[i] = Math.sin(1200 * 2 * Math.PI * i / audioContext.sampleRate) * 
+                                 Math.exp(-i / (0.03 * audioContext.sampleRate));
+                }
+                
+                // 创建警告声（用于倒计时和阶段切换）
+                const warningLength = 0.2 * audioContext.sampleRate;
+                warningSoundBuffer = audioContext.createBuffer(1, warningLength, audioContext.sampleRate);
+                const warningData = warningSoundBuffer.getChannelData(0);
+                for (let i = 0; i < warningLength; i++) {
+                    // 使用更高的频率和更短的持续时间
+                    warningData[i] = Math.sin(1500 * 2 * Math.PI * i / audioContext.sampleRate) * 
+                                    Math.exp(-i / (0.1 * audioContext.sampleRate));
+                }
+                
+                // 创建庆祝音效（更欢快愉悦的音效）
+                const celebrationLength = 4.5 * audioContext.sampleRate;
+                celebrationSoundBuffer = audioContext.createBuffer(1, celebrationLength, audioContext.sampleRate);
+                const celebrationData = celebrationSoundBuffer.getChannelData(0);
+                
+                // 创建上升的音阶效果 - 更愉悦的音符序列
+                const notes = [523.25, 587.33, 659.25, 698.46, 783.99, 880.00, 987.77, 1046.50, 1174.66, 1318.51]; // C5到E6
+                const noteDuration = celebrationLength / notes.length / audioContext.sampleRate;
+                
+                for (let i = 0; i < celebrationLength; i++) {
+                    const t = i / audioContext.sampleRate;
+                    const noteIndex = Math.floor(t / noteDuration);
+                    
+                    if (noteIndex < notes.length) {
+                        const freq = notes[noteIndex];
+                        const noteProgress = (t - noteIndex * noteDuration) / noteDuration;
+                        
+                        // 添加一些谐波和包络 - 更愉悦的波形
+                        celebrationData[i] = 0.4 * (
+                            Math.sin(2 * Math.PI * freq * t) * 
+                            (1 - Math.exp(-noteProgress/0.1)) * Math.exp(-noteProgress/0.7) +
+                            0.2 * Math.sin(2 * Math.PI * freq * 2 * t) * 
+                            (1 - Math.exp(-noteProgress/0.1)) * Math.exp(-noteProgress/0.7) +
+                            0.1 * Math.sin(2 * Math.PI * freq * 3 * t) * 
+                            (1 - Math.exp(-noteProgress/0.1)) * Math.exp(-noteProgress/0.7)
+                        );
+                    } else {
+                        celebrationData[i] = 0;
+                    }
+                }
+                
+                audioInitialized = true;
+            } catch (e) {
+                console.error("音频初始化失败:", e);
+            }
+        }
+
+        // 播放音频
+        function playSound(buffer) {
+            if (!audioInitialized || !audioContext) {
+                initializeAudio();
+                return;
+            }
+            
+            try {
+                // 检查音频上下文状态，如果是挂起状态则恢复
+                if (audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
+                
+                const source = audioContext.createBufferSource();
+                source.buffer = buffer;
+                source.connect(audioContext.destination);
+                source.start();
+            } catch (e) {
+                console.error("播放音频失败:", e);
+            }
+        }
+
+        // 播放滴答声
+        function playTickSound() {
+            if (tickSoundBuffer) {
+                playSound(tickSoundBuffer);
+            }
+        }
+
+        // 播放警告声
+        function playWarningSound() {
+            if (warningSoundBuffer) {
+                playSound(warningSoundBuffer);
+            }
+        }
+
+        // 播放庆祝音效
+        function playCelebrationSound() {
+            if (celebrationSoundBuffer) {
+                playSound(celebrationSoundBuffer);
+            }
+        }
+
+        // 文本转语音
+        function speakText(text) {
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'zh-CN';
+                utterance.rate = ttsVoiceSettings.rate;
+                utterance.pitch = ttsVoiceSettings.pitch;
+                utterance.volume = 1.0;
+                
+                // 设置语音
+                if (ttsVoiceSettings.voice) {
+                    utterance.voice = ttsVoiceSettings.voice;
+                }
+                
+                // 停止任何正在进行的语音
+                window.speechSynthesis.cancel();
+                
+                // 播放新语音
+                window.speechSynthesis.speak(utterance);
+            } else {
+                console.log("您的浏览器不支持文本转语音功能");
+            }
+        }
+
+        // 检查并播放语音提示
+        function checkAndPlayTts() {
+            // 完成阶段不播放语音提示
+            if (phases[currentPhase].isCompletion) return;
+            
+            // 查找当前阶段的语音提示
+            const currentPhaseTts = ttsSettings.filter(tts => tts.phaseId === currentPhase);
+            
+            // 检查是否有匹配的语音提示
+            currentPhaseTts.forEach(tts => {
+                if (phaseSeconds === tts.timePoint) {
+                    speakText(tts.text);
+                }
+            });
+        }
+
+        // 切换到指定阶段
+        function switchToPhase(phaseIndex) {
+            if (phaseIndex < 0 || phaseIndex >= phases.length) return;
+            
+            // 如果是完成阶段，不允许切换
+            if (phases[phaseIndex].isCompletion && !phases[currentPhase].isCompletion) {
+                return;
+            }
+            
+            currentPhase = phaseIndex;
+            phaseSeconds = phases[currentPhase].duration;
+            updatePhaseDisplay();
+        }
+
+        // 切换到上一阶段
+        function previousPhase() {
+            // 如果是完成阶段，不允许切换
+            if (phases[currentPhase].isCompletion) return;
+            
+            if (currentPhase > 0) {
+                switchToPhase(currentPhase - 1);
+            } else {
+                switchToPhase(phases.length - 1);
+            }
+        }
+
+        // 切换到下一阶段
+        function nextPhase() {
+            // 如果是完成阶段，不允许切换
+            if (phases[currentPhase].isCompletion) return;
+            
+            if (currentPhase < phases.length - 1) {
+                switchToPhase(currentPhase + 1);
+            } else {
+                switchToPhase(0);
+            }
+        }
+
+        // 开始准备倒计时
+        function startCountdown() {
+            let count = 3;
+            countdownNumber.textContent = count;
+            countdownOverlay.classList.add('active');
+            
+            // 立即播放第一次倒计时声音
+            playWarningSound();
+            
+            const countdownInterval = setInterval(() => {
+                count--;
+                if (count > 0) {
+                    countdownNumber.textContent = count;
+                    playWarningSound(); // 播放警告声作为倒计时音效
+                } else {
+                    countdownNumber.textContent = "开始!";
+                    playWarningSound(); // 播放"开始"音效
+                    setTimeout(() => {
+                        countdownOverlay.classList.remove('active');
+                        clearInterval(countdownInterval);
+                        
+                        // 记录开始时间
+                        startTimestamp = new Date();
+                        const timeString = startTimestamp.toLocaleTimeString();
+                        startTimeElement.textContent = `开始时间: ${timeString}`;
+                        startTimeMobileElement.textContent = `开始时间: ${timeString}`;
+                        
+                        startTimer(); // 倒计时结束后开始正式计时
+                    }, 1000);
+                }
+            }, 1000);
+        }
+
+        // 计时器主函数
+        function updateTimer() {
+            if (!isRunning) return;
+            
+            totalSeconds++;
+            
+            if (phases[currentPhase].isCompletion) {
+                // 完成阶段：正计时
+                phaseSeconds++;
+                
+                // 播放滴答声
+                playTickSound();
+            } else {
+                // 正常阶段：倒计时
+                phaseSeconds--;
+                
+                // 播放滴答声
+                playTickSound();
+                
+                // 检查并播放语音提示
+                checkAndPlayTts();
+                
+                // 检查阶段切换
+                if (phaseSeconds <= 0) {
+                    // 播放警告声作为阶段结束提示
+                    playWarningSound();
+                    
+                    // 修复：在切换到训练完成阶段时记录结束时间
+                    if (currentPhase === phases.length - 2) { // 如果当前是放松拉伸阶段（倒数第二个阶段）
+                        endTimestamp = new Date();
+                        const timeString = endTimestamp.toLocaleTimeString();
+                        endTimeElement.textContent = `结束时间: ${timeString}`;
+                        endTimeMobileElement.textContent = `结束时间: ${timeString}`;
+                    }
+                    
+                    // 切换到下一个阶段
+                    currentPhase++;
+                    
+                    if (currentPhase >= phases.length) {
+                        // 所有阶段完成
+                        currentPhase = phases.length - 1; // 保持在完成阶段
+                        phaseSeconds = 0;
+                        
+                        // 播放庆祝音效
+                        playCelebrationSound();
+                    } else {
+                        // 重置阶段时间
+                        phaseSeconds = phases[currentPhase].duration;
+                        
+                        // 如果切换到训练完成阶段，播放庆祝音效
+                        if (phases[currentPhase].isCompletion) {
+                            playCelebrationSound();
+                        }
+                    }
+                }
+                
+                // 检查是否需要播放警告声（阶段切换前3秒）
+                if (phaseSeconds <= 3 && phaseSeconds > 0) {
+                    playWarningSound();
+                }
+            }
+            
+            // 更新显示
+            updatePhaseDisplay();
+        }
+
+        // 开始计时器
+        function startTimer() {
+            if (isRunning) return;
+            
+            isRunning = true;
+            isPaused = false;
+            
+            startBtn.disabled = true;
+            pauseBtn.disabled = false;
+            resetBtn.disabled = false;
+            
+            updateTimerStatus();
+            
+            timerInterval = setInterval(updateTimer, 1000);
+        }
+
+        // 暂停计时器
+        function pauseTimer() {
+            if (!isRunning) return;
+            
+            isRunning = false;
+            isPaused = true;
+            
+            clearInterval(timerInterval);
+            
+            startBtn.disabled = false;
+            pauseBtn.disabled = true;
+            startBtn.textContent = "继续";
+            
+            updateTimerStatus();
+        }
+
+        // 停止计时器
+        function stopTimer() {
+            isRunning = false;
+            isPaused = false;
+            
+            clearInterval(timerInterval);
+            
+            startBtn.disabled = false;
+            pauseBtn.disabled = true;
+            resetBtn.disabled = true;
+            startBtn.textContent = "开始";
+            
+            updateTimerStatus();
+        }
+
+        // 重置计时器
+        function resetTimer() {
+            stopTimer();
+            
+            currentPhase = 0;
+            totalSeconds = 0;
+            phaseSeconds = phases[0].duration;
+            startTimestamp = null;
+            endTimestamp = null;
+            startTimeElement.textContent = "开始时间: --:--:--";
+            endTimeElement.textContent = "结束时间: --:--:--";
+            startTimeMobileElement.textContent = "开始时间: --:--:--";
+            endTimeMobileElement.textContent = "结束时间: --:--:--";
+            
+            updatePhaseDisplay();
+        }
+
+        // 打开编辑阶段模态框
+        function openEditPhasesModal() {
+            if (isRunning) {
+                alert("计时器运行时不能编辑阶段，请先暂停或重置计时器。");
+                return;
+            }
+            
+            phasesEditContainer.innerHTML = '';
+            
+            phases.forEach((phase, index) => {
+                const phaseEditDiv = document.createElement('div');
+                phaseEditDiv.className = 'phase-edit-item';
+                
+                const phaseHeader = document.createElement('div');
+                phaseHeader.className = 'phase-edit-header';
+                
+                const phaseTitle = document.createElement('div');
+                phaseTitle.className = 'phase-edit-title';
+                
+                // 添加阶段名称
+                const phaseNameSpan = document.createElement('span');
+                phaseNameSpan.textContent = `${index + 1}. ${phase.name}`;
+                phaseTitle.appendChild(phaseNameSpan);
+                
+                // 添加阶段时间显示（训练完成阶段除外）
+                if (!phase.isCompletion) {
+                    const phaseDurationSpan = document.createElement('span');
+                    phaseDurationSpan.className = 'phase-duration-display';
+                    phaseDurationSpan.textContent = `${Math.floor(phase.duration / 60)} 分钟`;
+                    phaseTitle.appendChild(phaseDurationSpan);
+                }
+                
+                const toggleBtn = document.createElement('button');
+                toggleBtn.className = 'toggle-btn';
+                toggleBtn.textContent = '▼';
+                toggleBtn.dataset.index = index;
+                
+                phaseHeader.appendChild(phaseTitle);
+                phaseHeader.appendChild(toggleBtn);
+                
+                const phaseContent = document.createElement('div');
+                phaseContent.className = 'phase-edit-content';
+                phaseContent.id = `phase-content-${index}`;
+                
+                const nameLabel = document.createElement('label');
+                nameLabel.textContent = '阶段名称:';
+                const nameInput = document.createElement('input');
+                nameInput.type = 'text';
+                nameInput.value = phase.name;
+                nameInput.dataset.index = index;
+                nameInput.dataset.field = 'name';
+                
+                const descLabel = document.createElement('label');
+                descLabel.textContent = '阶段描述:';
+                const descInput = document.createElement('input');
+                descInput.type = 'text';
+                descInput.value = phase.description;
+                descInput.dataset.index = index;
+                descInput.dataset.field = 'description';
+                
+                const durationLabel = document.createElement('label');
+                durationLabel.textContent = '持续时间 (分钟):';
+                const durationInput = document.createElement('input');
+                durationInput.type = 'number';
+                durationInput.min = '1';
+                durationInput.max = '120';
+                durationInput.value = Math.floor(phase.duration / 60);
+                durationInput.dataset.index = index;
+                durationInput.dataset.field = 'duration';
+                
+                // 完成阶段不显示删除按钮，并禁用持续时间输入
+                if (phase.isCompletion) {
+                    durationInput.disabled = true;
+                    durationInput.value = 0;
+                }
+                
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'delete-phase-btn';
+                deleteBtn.textContent = '删除阶段';
+                deleteBtn.addEventListener('click', () => {
+                    if (phases.length > 2) { // 至少保留两个阶段（一个普通阶段+完成阶段）
+                        phases.splice(index, 1);
+                        openEditPhasesModal(); // 重新渲染
+                    } else {
+                        alert('至少需要保留一个训练阶段');
+                    }
+                });
+                
+                phaseContent.appendChild(nameLabel);
+                phaseContent.appendChild(nameInput);
+                phaseContent.appendChild(descLabel);
+                phaseContent.appendChild(descInput);
+                phaseContent.appendChild(durationLabel);
+                phaseContent.appendChild(durationInput);
+                
+                // 完成阶段不显示删除按钮
+                if (!phase.isCompletion) {
+                    phaseContent.appendChild(deleteBtn);
+                }
+                
+                phaseEditDiv.appendChild(phaseHeader);
+                phaseEditDiv.appendChild(phaseContent);
+                phasesEditContainer.appendChild(phaseEditDiv);
+                
+                // 添加点击事件
+                toggleBtn.addEventListener('click', () => {
+                    const content = document.getElementById(`phase-content-${index}`);
+                    if (content.classList.contains('show')) {
+                        content.classList.remove('show');
+                        toggleBtn.textContent = '▼';
+                    } else {
+                        content.classList.add('show');
+                        toggleBtn.textContent = '▲';
+                    }
+                });
+                
+                // 添加持续时间输入变化事件，更新阶段标题中的时间显示
+                if (!phase.isCompletion) {
+                    durationInput.addEventListener('input', () => {
+                        const minutes = durationInput.value;
+                        const durationSpan = phaseTitle.querySelector('.phase-duration-display');
+                        if (durationSpan) {
+                            durationSpan.textContent = `${minutes} 分钟`;
+                        }
+                    });
+                }
+            });
+            
+            editPhasesModal.style.display = 'flex';
+        }
+
+        // 保存阶段编辑
+        function savePhasesEdit() {
+            let hasError = false;
+            
+            const inputs = phasesEditContainer.querySelectorAll('input');
+
+            // 先验证所有输入
+            inputs.forEach(input => {
+                const field = input.dataset.field;
+                const index = parseInt(input.dataset.index);
+                const phase = phases[index];
+
+                // 如果是完成阶段，跳过持续时间的验证
+                if (field === 'duration' && phase.isCompletion) {
+                    return;
+                }
+
+                if (field === 'duration') {
+                    const minutes = parseInt(input.value);
+
+                    if (isNaN(minutes) || minutes < 1 || minutes > 120) {
+                        hasError = true;
+                        input.style.border = "2px solid #F44336";
+                    } else {
+                        input.style.border = "";
+                    }
+                }
+            });
+            
+            // 如果有错误，提示用户
+            if (hasError) {
+                alert("请输入1-120之间的有效分钟数");
+                return;
+            }
+            
+            // 保存数据
+            inputs.forEach(input => {
+                const index = parseInt(input.dataset.index);
+                const field = input.dataset.field;
+                const phase = phases[index];
+                
+                // 如果是完成阶段，跳过持续时间的修改
+                if (field === 'duration' && phase.isCompletion) {
+                    return;
+                }
+                
+                if (field === 'duration') {
+                    const minutes = parseInt(input.value);
+                    phases[index][field] = minutes * 60;
+                } else {
+                    phases[index][field] = input.value;
+                }
+            });
+            
+            // 重置当前阶段和计时器
+            currentPhase = 0;
+            phaseSeconds = phases[0].duration;
+            totalSeconds = 0;
+            
+            // 更新显示
+            initializePhaseCarousel();
+            updatePhaseDisplay();
+            
+            editPhasesModal.style.display = 'none';
+        }
+
+        // 添加新阶段
+        function addNewPhase() {
+            // 在完成阶段之前插入新阶段
+            phases.splice(phases.length - 1, 0, {
+                name: "新阶段",
+                duration: 5 * 60,
+                description: "阶段描述"
+            });
+            openEditPhasesModal(); // 重新渲染
+        }
+
+        // 初始化语音设置
+        function initializeTtsSettings() {
+            // 获取可用的语音
+            function loadVoices() {
+                if ('speechSynthesis' in window) {
+                    const voices = speechSynthesis.getVoices();
+                    
+                    // 清空现有选项
+                    ttsVoice.innerHTML = '<option value="">默认音色</option>';
+                    
+                    // 添加语音选项
+                    voices.forEach(voice => {
+                        const option = document.createElement('option');
+                        option.value = voice.name;
+                        option.textContent = `${voice.name} (${voice.lang})`;
+                        ttsVoice.appendChild(option);
+                    });
+                    
+                    // 设置语音选择事件
+                    ttsVoice.addEventListener('change', () => {
+                        const voices = speechSynthesis.getVoices();
+                        const selectedVoice = voices.find(voice => voice.name === ttsVoice.value);
+                        ttsVoiceSettings.voice = selectedVoice || null;
+                    });
+                }
+            }
+            
+            // 语音列表可能需要时间加载
+            if (speechSynthesis.getVoices().length === 0) {
+                speechSynthesis.addEventListener('voiceschanged', loadVoices);
+            } else {
+                loadVoices();
+            }
+            
+            // 设置音调滑块事件
+            ttsPitch.addEventListener('input', () => {
+                ttsPitchValue.textContent = ttsPitch.value;
+                ttsVoiceSettings.pitch = parseFloat(ttsPitch.value);
+            });
+            
+            // 设置语速滑块事件
+            ttsRate.addEventListener('input', () => {
+                ttsRateValue.textContent = ttsRate.value;
+                ttsVoiceSettings.rate = parseFloat(ttsRate.value);
+            });
+            
+            // 设置测试按钮事件
+            ttsTestBtn.addEventListener('click', () => {
+                speakText("这是一个测试语音，用于测试当前音色、音调和语速设置");
+            });
+            
+            // 设置语音设置切换按钮事件
+            toggleVoiceSettingsBtn.addEventListener('click', () => {
+                if (ttsVoiceControls.classList.contains('show')) {
+                    ttsVoiceControls.classList.remove('show');
+                    toggleVoiceSettingsBtn.textContent = '显示语音设置';
+                } else {
+                    ttsVoiceControls.classList.add('show');
+                    toggleVoiceSettingsBtn.textContent = '隐藏语音设置';
+                }
+            });
+        }
+
+        // 打开语音设置模态框
+        function openTtsSettingsModal() {
+            ttsTableBody.innerHTML = '';
+            
+            ttsSettings.forEach((tts, index) => {
+                const row = document.createElement('tr');
+                
+                // 阶段选择
+                const phaseCell = document.createElement('td');
+                const phaseSelect = document.createElement('select');
+                phases.forEach((phase, phaseIndex) => {
+                    // 完成阶段不显示在语音设置中
+                    if (!phase.isCompletion) {
+                        const option = document.createElement('option');
+                        option.value = phaseIndex;
+                        option.textContent = phase.name;
+                        if (phaseIndex === tts.phaseId) {
+                            option.selected = true;
+                        }
+                        phaseSelect.appendChild(option);
+                    }
+                });
+                phaseSelect.dataset.index = index;
+                phaseSelect.dataset.field = 'phaseId';
+                phaseCell.appendChild(phaseSelect);
+                
+                // 时间点输入
+                const timeCell = document.createElement('td');
+                const timeInput = document.createElement('input');
+                timeInput.type = 'number';
+                timeInput.min = '1';
+                timeInput.max = '3600';
+                timeInput.value = tts.timePoint;
+                timeInput.dataset.index = index;
+                timeInput.dataset.field = 'timePoint';
+                timeCell.appendChild(timeInput);
+                
+                // 文本内容输入
+                const textCell = document.createElement('td');
+                const textInput = document.createElement('input');
+                textInput.type = 'text';
+                textInput.value = tts.text;
+                textInput.dataset.index = index;
+                textInput.dataset.field = 'text';
+                textCell.appendChild(textInput);
+                
+                // 操作按钮
+                const actionCell = document.createElement('td');
+                const deleteBtn = document.createElement('button');
+                deleteBtn.textContent = '删除';
+                deleteBtn.style.backgroundColor = '#F44336';
+                deleteBtn.addEventListener('click', () => {
+                    ttsSettings.splice(index, 1);
+                    openTtsSettingsModal(); // 重新渲染
+                });
+                actionCell.appendChild(deleteBtn);
+                
+                row.appendChild(phaseCell);
+                row.appendChild(timeCell);
+                row.appendChild(textCell);
+                row.appendChild(actionCell);
+                
+                ttsTableBody.appendChild(row);
+            });
+            
+            ttsSettingsModal.style.display = 'flex';
+        }
+
+        // 保存语音设置
+        function saveTtsSettings() {
+            const inputs = ttsTableBody.querySelectorAll('select, input');
+            const newTtsSettings = [];
+            
+            inputs.forEach(input => {
+                const index = parseInt(input.dataset.index);
+                const field = input.dataset.field;
+                
+                if (!newTtsSettings[index]) {
+                    newTtsSettings[index] = { phaseId: 0, timePoint: 0, text: '' };
+                }
+                
+                if (field === 'phaseId' || field === 'timePoint') {
+                    newTtsSettings[index][field] = parseInt(input.value);
+                } else {
+                    newTtsSettings[index][field] = input.value;
+                }
+            });
+            
+            ttsSettings = newTtsSettings;
+            ttsSettingsModal.style.display = 'none';
+        }
+
+        // 添加新的语音提示
+        function addNewTts() {
+            ttsSettings.push({
+                phaseId: 0,
+                timePoint: 30,
+                text: "新的语音提示"
+            });
+            openTtsSettingsModal(); // 重新渲染
+        }
+
+        // 初始化
+        function initialize() {
+            initializePhaseCarousel();
+            updateCurrentTime();
+            updatePhaseDisplay();
+            updateTimerStatus();
+            
+            // 初始化音频系统
+            initializeAudio();
+            
+            // 初始化语音设置
+            initializeTtsSettings();
+            
+            // 每秒更新当前时间
+            currentTimeInterval = setInterval(updateCurrentTime, 1000);
+            
+            // 添加事件监听器
+            startBtn.addEventListener('click', () => {
+                // 点击开始按钮时初始化音频并开始倒计时
+                initializeAudio();
+                startCountdown();
+            });
+            pauseBtn.addEventListener('click', pauseTimer);
+            resetBtn.addEventListener('click', resetTimer);
+            
+            // 轮盘导航事件
+            carouselPrev.addEventListener('click', previousPhase);
+            carouselNext.addEventListener('click', nextPhase);
+            carouselPrevVertical.addEventListener('click', previousPhase);
+            carouselNextVertical.addEventListener('click', nextPhase);
+            
+            // 设置按钮事件监听器
+            editPhasesBtn.addEventListener('click', openEditPhasesModal);
+            ttsSettingsBtn.addEventListener('click', openTtsSettingsModal);
+            
+            // 阶段编辑模态框事件监听器
+            addPhaseBtn.addEventListener('click', addNewPhase);
+            savePhasesBtn.addEventListener('click', savePhasesEdit);
+            cancelPhasesEditBtn.addEventListener('click', () => {
+                editPhasesModal.style.display = 'none';
+            });
+            
+            // 语音设置模态框事件监听器
+            addTtsBtn.addEventListener('click', addNewTts);
+            saveTtsBtn.addEventListener('click', saveTtsSettings);
+            cancelTtsBtn.addEventListener('click', () => {
+                ttsSettingsModal.style.display = 'none';
+            });
+            
+            // 点击模态框外部关闭
+            editPhasesModal.addEventListener('click', (e) => {
+                if (e.target === editPhasesModal) {
+                    editPhasesModal.style.display = 'none';
+                }
+            });
+            
+            ttsSettingsModal.addEventListener('click', (e) => {
+                if (e.target === ttsSettingsModal) {
+                    ttsSettingsModal.style.display = 'none';
+                }
+            });
+            
+            // 窗口大小改变时更新轮盘位置和按钮显示
+            window.addEventListener('resize', () => {
+                updateCarouselPosition();
+                updateNavigationButtons();
+            });
+        }
+
+        // 页面加载完成后初始化
+        window.addEventListener('load', initialize);
+    </script>
+</body>
+</html>
