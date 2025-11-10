@@ -1118,11 +1118,51 @@
 
         // 定义文本转语音设置
         let ttsSettings = [
+	// 热身阶段提醒
             { phaseId: 0, timePoint: 10, text: "热身阶段即将结束，请准备休息" },
-            { phaseId: 2, timePoint: 60, text: "拳击训练已进行一分钟" },
-            { phaseId: 2, timePoint: 300, text: "拳击训练已进行五分钟" },
-            { phaseId: 4, timePoint: 60, text: "力量训练已进行一分钟" },
-            { phaseId: 6, timePoint: 30, text: "放松拉伸即将结束，训练即将完成" }
+            { phaseId: 0, timePoint: 899, text: "使用开合跳或者跳绳来进行初始热身" },
+            { phaseId: 0, timePoint: 720, text: "进行动态拉伸、高抬腿、后踢腿等动作" },
+            { phaseId: 0, timePoint: 180, text: "最后三分钟快速碎步、高抬腿进行神经激活" },
+	// 休息阶段提醒
+            { phaseId: 1, timePoint: 10, text: "休息阶段即将结束，请准备拳击训练" },
+            { phaseId: 1, timePoint: 119, text: "快速补水，调整手绷带，心理准备进入拳击状态。" },
+            { phaseId: 3, timePoint: 10, text: "休息阶段即将结束，请准备力量训练" },
+            { phaseId: 3, timePoint: 179, text: "充分补水，擦汗，深呼吸让心率稍作回落，为力量训练做准备。" },
+            { phaseId: 5, timePoint: 10, text: "休息阶段即将结束，请准备放松拉伸" },
+            { phaseId: 5, timePoint: 119, text: "拿取筋膜枪、铺垫子，准备进行最后放松。" },
+
+	//拳击阶段内提醒
+            { phaseId: 2, timePoint: 10, text: "拳击训练阶段即将结束，请准备休息" },
+            { phaseId: 2, timePoint: 1799, text: "先进行一分钟静止基本姿势" },
+            { phaseId: 2, timePoint: 1740, text: "进行前后左右滑步各一分钟" },
+            { phaseId: 2, timePoint: 1650, text: "注意，质量大于数量，保持动作标准" },
+            { phaseId: 2, timePoint: 1500, text: "进行技术打磨，今天是摆拳，前后手击头各五十次" },
+            { phaseId: 2, timePoint: 1300, text: "注意，质量大于数量，保持动作标准" },
+            { phaseId: 2, timePoint: 600, text: "拳击训练阶段还剩十分钟" },
+            { phaseId: 2, timePoint: 300, text: "结合步法，移动出拳" },
+            { phaseId: 2, timePoint: 150, text: "注意，质量大于数量，保持动作标准" },
+
+	// 力量训练阶段内提醒
+            { phaseId: 4, timePoint: 10, text: "力量训练阶段即将结束，请准备休息" },
+            { phaseId: 4, timePoint: 1799, text: "准备一组力竭击掌俯卧撑" },
+            { phaseId: 4, timePoint: 1770, text: "准备二组力竭击拳俯卧撑" },
+            { phaseId: 4, timePoint: 1500, text: "准备三组自重深蹲20次" },
+            { phaseId: 4, timePoint: 1200, text: "准备腹肌核心训练" },
+            { phaseId: 4, timePoint: 600, text: "力量训练阶段还剩10分钟" },
+
+	// 放松拉伸阶段内提醒
+            { phaseId: 6, timePoint: 10, text: "放松拉伸阶段即将结束，训练即将完成" },
+            { phaseId: 6, timePoint: 599, text: "筋膜枪重点放松肩、手臂、胸、背、腿，沿着肌肉的生长走向缓慢移动，不要来回胡乱震动。" },
+            { phaseId: 6, timePoint: 540, text: "施加稳定、适度的压力，以感觉到肌肉深处有震动感为宜。" },
+            { phaseId: 6, timePoint: 480, text: "以每秒2-4厘米的速度缓慢移动，在特别酸痛的“激痛点”上可以停留10-30秒。" },
+            { phaseId: 6, timePoint: 420, text: "尽量让按摩头与肌肉表面保持90度垂直，以确保力量能有效传导至深层。" },
+            { phaseId: 6, timePoint: 300, text: "放松拉伸阶段还剩5分钟" },
+            { phaseId: 6, timePoint: 280, text: "静态拉伸： 胸、肩、手臂、背部、大腿、臀、小腿、髋" },
+            { phaseId: 6, timePoint: 230, text: "缓慢地进入拉伸姿势，避免用爆发力弹震。" },
+            { phaseId: 6, timePoint: 205, text: "拉伸到感觉肌肉有轻微的、舒适的牵拉感即可，绝不是剧痛。" },
+            { phaseId: 6, timePoint: 255, text: "在每个姿势保持20-30秒，期间进行深长而缓慢的呼吸，用呼气来帮助身体更深地放松。" },
+            { phaseId: 6, timePoint: 180, text: "两侧身体都要拉伸，时间保持一致。" },
+
         ];
 
         // 获取DOM元素
@@ -1937,8 +1977,9 @@
             // 更新显示
             initializePhaseCarousel();
             updatePhaseDisplay();
-            
+
             editPhasesModal.style.display = 'none';
+
         }
 
         // 添加新阶段
