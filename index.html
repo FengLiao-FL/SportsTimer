@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>运动计时器</title>
+    <title>运动计时器5.0</title>
     <style>
         * {
             margin: 0;
@@ -56,12 +56,16 @@
         }
         
         .timer-status {
-            font-size: 1.2rem;
+            font-size: 1.4rem;
             color: #4CAF50;
             font-weight: bold;
             transition: all 0.3s;
             flex: 1;
             text-align: center;
+            padding: 10px;
+            border-radius: 10px;
+            background-color: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
         }
         
         .timer-status.pulsing {
@@ -124,6 +128,7 @@
             align-items: center;
             justify-content: center;
             height: 100%;
+            position: relative;
         }
         
         .phase-carousel {
@@ -261,6 +266,7 @@
         
         .carousel-nav-vertical:hover {
             background-color: rgba(253, 187, 45, 0.2);
+            transform: translateX(-50%) scale(1.1);
         }
         
         .carousel-prev-vertical {
@@ -306,6 +312,7 @@
             gap: 15px;
             margin: 30px 0;
             flex-wrap: wrap;
+            position: relative;
         }
         
         .main-controls {
@@ -315,14 +322,45 @@
         }
         
         button {
-            padding: 12px 25px;
-            font-size: 1.2rem;
+            padding: 10px 20px; /* 减小按钮内边距 */
+            font-size: 1rem; /* 减小字体大小 */
             border: none;
             border-radius: 50px;
             cursor: pointer;
             transition: all 0.3s;
             font-weight: bold;
-            min-width: 120px;
+            min-width: 90px; /* 减小最小宽度 */
+            position: relative;
+            overflow: hidden;
+        }
+        
+        button:after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 5px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.5);
+            opacity: 0;
+            border-radius: 100%;
+            transform: scale(1, 1) translate(-50%);
+            transform-origin: 50% 50%;
+        }
+        
+        button:focus:not(:active)::after {
+            animation: ripple 1s ease-out;
+        }
+        
+        @keyframes ripple {
+            0% {
+                transform: scale(0, 0);
+                opacity: 0.5;
+            }
+            100% {
+                transform: scale(20, 20);
+                opacity: 0;
+            }
         }
         
         #startBtn {
@@ -340,15 +378,35 @@
             color: white;
         }
         
+        #addTimeBtn {
+            background-color: #2196F3;
+            color: white;
+        }
+        
+        #subtractTimeBtn {
+            background-color: #FF9800;
+            color: white;
+        }
+        
+        #finishBtn {
+            background-color: #9C27B0;
+            color: white;
+        }
+        
         button:active {
             transform: translateY(1px);
         }
         
         button:disabled {
-            background-color: #cccccc;
-            color: #666666;
+            background-color: #555555 !important; /* 改为更暗的颜色 */
+            color: #888888 !important;
             cursor: not-allowed;
             transform: none;
+        }
+        
+        /* 按钮悬停效果 */
+        #subtractTimeBtn:hover:not(:disabled), #startBtn:hover:not(:disabled), #addTimeBtn:hover:not(:disabled), #pauseBtn:hover:not(:disabled), #resetBtn:hover:not(:disabled), #finishBtn:hover:not(:disabled) {
+            transform: translateY(-5px) scale(1.05);
         }
         
         /* 设置按钮样式 */
@@ -414,6 +472,25 @@
             position: relative;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
             border: 1px solid #444;
+        }
+        
+        /* 自定义滚动条 */
+        .modal-content::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .modal-content::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+        
+        .modal-content::-webkit-scrollbar-thumb {
+            background: rgba(253, 187, 45, 0.7);
+            border-radius: 4px;
+        }
+        
+        .modal-content::-webkit-scrollbar-thumb:hover {
+            background: rgba(253, 187, 45, 0.9);
         }
         
         .modal-header {
@@ -525,7 +602,7 @@
         }
         
         /* 阶段编辑项样式 - 优化版 */
-        .phase-edit-item {
+        .phase-edit-item, .tts-edit-item {
             margin-bottom: 15px;
             padding: 15px;
             background: linear-gradient(145deg, #3a3a3a, #2a2a2a);
@@ -535,14 +612,14 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
         
-        .phase-edit-header {
+        .phase-edit-header, .tts-edit-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             cursor: pointer;
         }
         
-        .phase-edit-title {
+        .phase-edit-title, .tts-edit-title {
             font-size: 1.2rem;
             font-weight: bold;
             color: #fdbb2d;
@@ -551,7 +628,7 @@
             gap: 10px;
         }
         
-        .phase-duration-display {
+        .phase-duration-display, .tts-timepoint-display {
             color: #aaa;
             font-weight: normal;
             font-size: 0.9rem;
@@ -571,23 +648,23 @@
             transform: scale(1.1);
         }
         
-        .phase-edit-content {
+        .phase-edit-content, .tts-edit-content {
             margin-top: 15px;
             display: none;
         }
         
-        .phase-edit-content.show {
+        .phase-edit-content.show, .tts-edit-content.show {
             display: block;
         }
         
-        .phase-edit-content label {
+        .phase-edit-content label, .tts-edit-content label {
             display: block;
             margin-bottom: 5px;
             font-size: 1rem;
             color: #e0e0e0;
         }
         
-        .phase-edit-content input {
+        .phase-edit-content input, .tts-edit-content input, .tts-edit-content select {
             width: 100%;
             padding: 8px;
             margin-bottom: 10px;
@@ -598,13 +675,13 @@
             transition: all 0.3s;
         }
         
-        .phase-edit-content input:focus {
+        .phase-edit-content input:focus, .tts-edit-content input:focus, .tts-edit-content select:focus {
             outline: none;
             border-color: #fdbb2d;
             box-shadow: 0 0 5px rgba(253, 187, 45, 0.5);
         }
         
-        .delete-phase-btn {
+        .delete-phase-btn, .delete-tts-btn {
             background: linear-gradient(145deg, #F44336, #d32f2f);
             margin-top: 10px;
             padding: 8px 15px;
@@ -709,6 +786,255 @@
             color: white;
         }
         
+        /* 报告分析框样式 */
+        .report-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: linear-gradient(145deg, #3a3a3a, #2a2a2a);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            font-size: 1rem; /* 默认字体大小 */
+        }
+        
+        .report-table th, .report-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #444;
+        }
+        
+        .report-table th {
+            background: linear-gradient(145deg, #4a4a4a, #3a3a3a);
+            color: #fdbb2d;
+            font-weight: bold;
+        }
+        
+        .report-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .report-summary {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .report-summary p {
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .performance-excellent {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        
+        .performance-fair {
+            color: #FFC107;
+            font-weight: bold;
+        }
+        
+        .performance-hard {
+            color: #FF9800;
+            font-weight: bold;
+        }
+        
+        .performance-extreme {
+            color: #F44336;
+            font-weight: bold;
+        }
+        
+        .performance-general {
+            color: #2196F3;
+            font-weight: bold;
+        }
+        
+        .performance-reduced {
+            color: #9C27B0;
+            font-weight: bold;
+        }
+        
+        .performance-untrained {
+            color: #aaa;
+            font-weight: bold;
+        }
+        
+        /* 加时/减时提示样式 - 修改为透明背景 */
+        .time-adjustment-message {
+            position: absolute;
+            top: -50px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.7);
+            color: #2196F3;
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            z-index: 1001;
+            opacity: 0;
+            transition: opacity 0.3s;
+            white-space: nowrap;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        .time-adjustment-message.subtract {
+            color: #FF9800;
+        }
+        
+        .time-adjustment-message.show {
+            opacity: 1;
+        }
+        
+        /* 新增样式 */
+        .report-summary-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .report-summary-item {
+            text-align: center;
+            padding: 10px;
+            background: linear-gradient(145deg, #3a3a3a, #2a2a2a);
+            border-radius: 8px;
+            border: 1px solid #444;
+        }
+        
+        .report-summary-item p {
+            margin: 5px 0;
+        }
+        
+        .extra-time-red {
+            color: #F44336 !important;
+        }
+        
+        .subtract-time-green {
+            color: #4CAF50 !important;
+        }
+        
+        .actual-time-purple {
+            color: #C678FF !important; /* 更亮的紫色 */
+        }
+        
+        /* 总计行样式 - 蓝色字体，背景与其他行一致 */
+        .total-row {
+            font-weight: bold;
+            color: #2196F3 !important; /* 蓝色字体 */
+        }
+        
+        /* 烟花效果样式 - 确保文字显示 */
+        .fireworks-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s, visibility 0.5s;
+        }
+        
+        .fireworks-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .fireworks-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+        
+        .firework {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #fdbb2d;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation: explode 1.5s forwards;
+            z-index: 1; /* 确保烟花在文字下面 */
+        }
+        
+        @keyframes explode {
+            0% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) scale(0);
+                opacity: 0;
+            }
+        }
+        
+        .celebration-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 4rem;
+            font-weight: bold;
+            color: #fdbb2d;
+            text-shadow: 0 0 20px rgba(253, 187, 45, 0.8);
+            z-index: 10; /* 确保文字在烟花上面 */
+            text-align: center;
+            line-height: 1.2;
+        }
+        
+        /* 自定义通知样式 */
+        .notification-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .notification {
+            background: linear-gradient(145deg, #3a3a3a, #2a2a2a);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            border-left: 4px solid #fdbb2d;
+            max-width: 300px;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.3s ease;
+        }
+        
+        .notification.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        
+        .notification.hide {
+            opacity: 0;
+            transform: translateX(100%);
+        }
+        
+        .notification-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #fdbb2d;
+        }
+        
+        .notification-message {
+            font-size: 0.9rem;
+        }
+        
         /* 移动端优化 */
         @media (max-width: 768px) {
             .container {
@@ -728,6 +1054,11 @@
             .timer-status-container {
                 flex-direction: row;
                 gap: 10px;
+            }
+            
+            .timer-status {
+                font-size: 1.2rem;
+                padding: 8px;
             }
             
             .progress-indicator {
@@ -786,13 +1117,13 @@
             }
             
             button {
-                padding: 10px 15px;
-                font-size: 1rem;
-                min-width: 100px;
+                padding: 8px 12px; /* 移动端按钮更小 */
+                font-size: 0.9rem;
+                min-width: 80px;
             }
             
             .settings-btn {
-                min-width: 50px;
+                min-width: 10px;
             }
             
             .controls {
@@ -852,6 +1183,49 @@
             .carousel-nav {
                 display: block;
             }
+            
+            /* 移动端报告摘要网格 */
+            .report-summary-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            /* 移动端报告摘要项内名称和时间在同一行 */
+            .report-summary-item {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                text-align: left;
+            }
+            
+            .report-summary-item p {
+                margin: 0;
+            }
+            
+            /* 移动端庆祝文字 */
+            .celebration-text {
+                font-size: 2.5rem;
+            }
+            
+            /* 移动端通知样式 */
+            .notification-container {
+                top: 10px;
+                right: 10px;
+                left: 10px;
+                align-items: center;
+            }
+            
+            .notification {
+                max-width: 100%;
+            }
+            
+            /* 移动端报告表格字体缩小 */
+            .report-table {
+                font-size: 0.8rem; /* 移动端字体更小 */
+            }
+            
+            .report-table th, .report-table td {
+                padding: 8px 10px; /* 移动端内边距更小 */
+            }
         }
         
         @media (min-width: 769px) {
@@ -900,6 +1274,11 @@
             .time-row {
                 display: none;
             }
+            
+            /* 宽屏下调整时间调整提示的位置 - 靠近倒计时数字 */
+            .time-adjustment-message {
+                top: 30px; /* 调整位置，使其更靠近倒计时数字 */
+            }
         }
         
         @media (max-width: 480px) {
@@ -942,9 +1321,9 @@
             }
             
             button {
-                padding: 10px 12px;
-                min-width: 90px;
-                font-size: 0.9rem;
+                padding: 8px 10px; /* 超小屏幕按钮更小 */
+                min-width: 70px;
+                font-size: 0.8rem;
             }
             
             .settings-btn {
@@ -962,10 +1341,26 @@
             .tts-table th, .tts-table td {
                 padding: 5px;
             }
+            
+            .celebration-text {
+                font-size: 2rem;
+            }
+            
+            /* 超小屏幕报告表格字体更小 */
+            .report-table {
+                font-size: 0.7rem;
+            }
+            
+            .report-table th, .report-table td {
+                padding: 5px 8px;
+            }
         }
     </style>
 </head>
 <body>
+    <!-- 自定义通知容器 -->
+    <div class="notification-container" id="notificationContainer"></div>
+    
     <div class="container">
         <div class="settings-buttons">
             <button class="settings-btn" id="editPhasesBtn" title="编辑阶段">✏️</button>
@@ -999,6 +1394,9 @@
             </div>
             
             <div class="phase-right">
+                <!-- 时间调整提示 -->
+                <div class="time-adjustment-message" id="timeAdjustmentMessage"></div>
+                
                 <div class="phase-timer" id="phaseTimer">00:00</div>
                 <div class="phase-timer-label">阶段倒计时</div>
             </div>
@@ -1017,9 +1415,14 @@
         
         <div class="controls">
             <div class="main-controls">
+                <!-- 减时按钮在开始按钮左边 -->
+                <button id="subtractTimeBtn" disabled title="减时1分钟">减时</button>
                 <button id="startBtn">开始</button>
+                <!-- 加时按钮在开始按钮右边 -->
+                <button id="addTimeBtn" disabled title="加时1分钟">加时</button>
                 <button id="pauseBtn" disabled>暂停</button>
                 <button id="resetBtn" disabled>重置</button>
+                <button id="finishBtn" disabled title="结束训练并生成报告">结束</button>
             </div>
         </div>
         
@@ -1028,6 +1431,12 @@
     <!-- 准备倒计时覆盖层 -->
     <div class="countdown-overlay" id="countdownOverlay">
         <div class="countdown-number" id="countdownNumber">3</div>
+    </div>
+
+    <!-- 烟花庆祝效果 -->
+    <div class="fireworks-overlay" id="fireworksOverlay">
+        <div class="fireworks-container" id="fireworksContainer"></div>
+        <div class="celebration-text">恭喜完成训练！太棒啦！</div>
     </div>
 
     <!-- 编辑阶段模态框 -->
@@ -1086,25 +1495,67 @@
                 
                 <p>设置在不同阶段和时间点播放的语音提示</p>
                 
-                <table class="tts-table" id="ttsTable">
+                <div id="ttsEditContainer">
+                    <!-- 语音提示编辑内容将通过JavaScript动态生成 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 报告分析模态框 -->
+    <div class="modal" id="reportModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="reportTitle">运动执行情况报告</h2>
+            </div>
+            <div class="modal-body">
+                <div class="report-summary">
+                    <div class="report-summary-grid">
+                        <div class="report-summary-item">
+                            <p><strong>开始时间:</strong></p>
+                            <p id="reportStartTime">--:--:--</p>
+                        </div>
+                        <div class="report-summary-item">
+                            <p><strong>结束时间:</strong></p>
+                            <p id="reportEndTime">--:--:--</p>
+                        </div>
+                        <div class="report-summary-item">
+                            <p><strong>运动计划时间:</strong></p>
+                            <p id="reportPlannedTime">00:00:00</p>
+                        </div>
+                        <div class="report-summary-item">
+                            <p><strong>实际运动时间:</strong></p>
+                            <p id="reportActualTime" class="actual-time-purple">00:00:00</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <table class="report-table" id="reportTable">
                     <thead>
                         <tr>
-                            <th>阶段</th>
-                            <th>时间点(秒)</th>
-                            <th>语音内容</th>
-                            <th>操作</th>
+                            <th>阶段名称</th>
+                            <th>计划用时</th>
+                            <th>实际用时</th>
+                            <th>加时时间</th>
+                            <th>减时时间</th>
+                            <th>暂停时间</th>
+                            <th>完成程度</th>
                         </tr>
                     </thead>
-                    <tbody id="ttsTableBody">
-                        <!-- 语音提示内容将通过JavaScript动态生成 -->
+                    <tbody id="reportTableBody">
+                        <!-- 报告内容将通过JavaScript动态生成 -->
                     </tbody>
                 </table>
+                
+                <div class="modal-buttons">
+                    <button id="closeReportBtn">重置</button>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        // 定义训练阶段 - 将训练完成作为最后一个阶段
+        // 定义训练阶段 - 已移除训练完成阶段
         const phases = [
             { name: "热身阶段", duration: 15 * 60, description: "准备活动，提高心率" },
             { name: "休息时间", duration: 2 * 60, description: "短暂休息" },
@@ -1112,26 +1563,24 @@
             { name: "休息时间", duration: 3 * 60, description: "恢复体力" },
             { name: "力量训练", duration: 30 * 60, description: "增强肌肉力量" },
             { name: "休息时间", duration: 2 * 60, description: "短暂休息" },
-            { name: "放松拉伸", duration: 10 * 60, description: "缓解肌肉紧张" },
-            { name: "训练完成", duration: 0, description: "恭喜完成训练！太棒啦！", isCompletion: true }
+            { name: "放松拉伸", duration: 10 * 60, description: "缓解肌肉紧张" }
         ];
 
         // 定义文本转语音设置
         let ttsSettings = [
-	// 热身阶段提醒
+            // 热身阶段提醒
             { phaseId: 0, timePoint: 10, text: "热身阶段即将结束，请准备休息" },
             { phaseId: 0, timePoint: 899, text: "使用开合跳或者跳绳来进行初始热身" },
             { phaseId: 0, timePoint: 720, text: "进行动态拉伸、高抬腿、后踢腿等动作" },
             { phaseId: 0, timePoint: 180, text: "最后三分钟快速碎步、高抬腿进行神经激活" },
-	// 休息阶段提醒
+            // 休息阶段提醒
             { phaseId: 1, timePoint: 10, text: "休息阶段即将结束，请准备拳击训练" },
             { phaseId: 1, timePoint: 119, text: "快速补水，调整手绷带，心理准备进入拳击状态。" },
             { phaseId: 3, timePoint: 10, text: "休息阶段即将结束，请准备力量训练" },
             { phaseId: 3, timePoint: 179, text: "充分补水，擦汗，深呼吸让心率稍作回落，为力量训练做准备。" },
             { phaseId: 5, timePoint: 10, text: "休息阶段即将结束，请准备放松拉伸" },
             { phaseId: 5, timePoint: 119, text: "拿取筋膜枪、铺垫子，准备进行最后放松。" },
-
-	//拳击阶段内提醒
+            //拳击阶段内提醒
             { phaseId: 2, timePoint: 10, text: "拳击训练阶段即将结束，请准备休息" },
             { phaseId: 2, timePoint: 1799, text: "先进行一分钟静止基本姿势" },
             { phaseId: 2, timePoint: 1740, text: "进行前后左右滑步各一分钟" },
@@ -1141,20 +1590,18 @@
             { phaseId: 2, timePoint: 600, text: "拳击训练阶段还剩十分钟" },
             { phaseId: 2, timePoint: 300, text: "结合步法，移动出拳" },
             { phaseId: 2, timePoint: 150, text: "注意，质量大于数量，保持动作标准" },
-
-	// 力量训练阶段内提醒
+            // 力量训练阶段内提醒
             { phaseId: 4, timePoint: 10, text: "力量训练阶段即将结束，请准备休息" },
             { phaseId: 4, timePoint: 1799, text: "准备一组力竭击掌俯卧撑" },
             { phaseId: 4, timePoint: 1770, text: "准备二组力竭击拳俯卧撑" },
             { phaseId: 4, timePoint: 1500, text: "准备三组自重深蹲20次" },
             { phaseId: 4, timePoint: 1200, text: "准备腹肌核心训练" },
             { phaseId: 4, timePoint: 600, text: "力量训练阶段还剩10分钟" },
-
-	// 放松拉伸阶段内提醒
+            // 放松拉伸阶段内提醒
             { phaseId: 6, timePoint: 10, text: "放松拉伸阶段即将结束，训练即将完成" },
             { phaseId: 6, timePoint: 599, text: "筋膜枪重点放松肩、手臂、胸、背、腿，沿着肌肉的生长走向缓慢移动，不要来回胡乱震动。" },
             { phaseId: 6, timePoint: 540, text: "施加稳定、适度的压力，以感觉到肌肉深处有震动感为宜。" },
-            { phaseId: 6, timePoint: 480, text: "以每秒2-4厘米的速度缓慢移动，在特别酸痛的“激痛点”上可以停留10-30秒。" },
+            { phaseId: 6, timePoint: 480, text: "以每秒2-4厘米的速度缓慢移动，在特别酸痛的激痛点上可以停留10-30秒。" },
             { phaseId: 6, timePoint: 420, text: "尽量让按摩头与肌肉表面保持90度垂直，以确保力量能有效传导至深层。" },
             { phaseId: 6, timePoint: 300, text: "放松拉伸阶段还剩5分钟" },
             { phaseId: 6, timePoint: 280, text: "静态拉伸： 胸、肩、手臂、背部、大腿、臀、小腿、髋" },
@@ -1163,6 +1610,14 @@
             { phaseId: 6, timePoint: 255, text: "在每个姿势保持20-30秒，期间进行深长而缓慢的呼吸，用呼气来帮助身体更深地放松。" },
             { phaseId: 6, timePoint: 180, text: "两侧身体都要拉伸，时间保持一致。" },
 
+	// 还剩1分钟语音提示
+            { phaseId: 0, timePoint: 60, text: "热身阶段还剩1分钟" },
+            { phaseId: 1, timePoint: 60, text: "休息时间还剩1分钟" },
+            { phaseId: 2, timePoint: 60, text: "拳击训练阶段还剩1分钟" },
+            { phaseId: 3, timePoint: 60, text: "休息时间还剩1分钟" },
+            { phaseId: 4, timePoint: 60, text: "力量训练阶段还剩1分钟" },
+            { phaseId: 5, timePoint: 60, text: "休息还剩1分钟" },
+            { phaseId: 6, timePoint: 60, text: "放松拉伸阶段还剩1分钟" },
         ];
 
         // 获取DOM元素
@@ -1172,9 +1627,12 @@
         const nextPhaseIndicatorElement = document.getElementById('nextPhaseIndicator');
         const totalTimerElement = document.getElementById('totalTimer');
         const phaseTimerElement = document.getElementById('phaseTimer');
+        const subtractTimeBtn = document.getElementById('subtractTimeBtn');
+        const addTimeBtn = document.getElementById('addTimeBtn');
         const startBtn = document.getElementById('startBtn');
         const pauseBtn = document.getElementById('pauseBtn');
         const resetBtn = document.getElementById('resetBtn');
+        const finishBtn = document.getElementById('finishBtn');
         const startTimeElement = document.getElementById('startTime');
         const endTimeElement = document.getElementById('endTime');
         const startTimeMobileElement = document.getElementById('startTimeMobile');
@@ -1194,8 +1652,9 @@
         // 模态框相关元素
         const editPhasesModal = document.getElementById('editPhasesModal');
         const ttsSettingsModal = document.getElementById('ttsSettingsModal');
+        const reportModal = document.getElementById('reportModal');
         const phasesEditContainer = document.getElementById('phasesEditContainer');
-        const ttsTableBody = document.getElementById('ttsTableBody');
+        const ttsEditContainer = document.getElementById('ttsEditContainer');
         
         // 模态框按钮
         const addPhaseBtn = document.getElementById('addPhaseBtn');
@@ -1204,6 +1663,7 @@
         const addTtsBtn = document.getElementById('addTtsBtn');
         const saveTtsBtn = document.getElementById('saveTtsBtn');
         const cancelTtsBtn = document.getElementById('cancelTtsBtn');
+        const closeReportBtn = document.getElementById('closeReportBtn');
         
         // 语音设置元素
         const ttsVoiceControls = document.getElementById('ttsVoiceControls');
@@ -1218,6 +1678,19 @@
         // 新增：准备倒计时元素
         const countdownOverlay = document.getElementById('countdownOverlay');
         const countdownNumber = document.getElementById('countdownNumber');
+        
+        // 新增：时间调整提示元素
+        const timeAdjustmentMessage = document.getElementById('timeAdjustmentMessage');
+        
+        // 新增：烟花庆祝元素
+        const fireworksOverlay = document.getElementById('fireworksOverlay');
+        const fireworksContainer = document.getElementById('fireworksContainer');
+        
+        // 新增：报告标题元素
+        const reportTitle = document.getElementById('reportTitle');
+        
+        // 新增：通知容器
+        const notificationContainer = document.getElementById('notificationContainer');
 
         // 初始化变量
         let currentPhase = 0;
@@ -1225,7 +1698,8 @@
         let phaseSeconds = phases[0].duration;
         let isRunning = false;
         let isPaused = false;
-        let timerInterval;
+        let timerInterval; // 阶段计时器
+        let totalTimerInterval; // 总计时器（独立）
         let currentTimeInterval;
         let startTimestamp = null;
         let endTimestamp = null;
@@ -1240,7 +1714,24 @@
         let tickSoundBuffer;
         let warningSoundBuffer;
         let celebrationSoundBuffer;
+        let minuteSoundBuffer;
         let audioInitialized = false;
+        
+        // 新增：阶段加时记录 - 修复：初始化所有阶段为0
+        let phaseExtraTime = Array(phases.length).fill(0);
+        let phaseStartTimes = Array(phases.length).fill(null);
+        let phaseActualDurations = Array(phases.length).fill(0);
+        let phasePauseTimes = Array(phases.length).fill(0); // 记录每个阶段的暂停时间（秒）
+        let pauseStartTime = null; // 记录暂停开始的时间
+        let phaseElapsedSeconds = Array(phases.length).fill(0); // 记录每个阶段已经经过的秒数
+        
+        // 新增：阶段实际用时记录变量
+        let phaseActualTimeRecords = Array(phases.length).fill(0); // 记录每个阶段的实际用时
+        let phaseElapsedTime = Array(phases.length).fill(0); // 记录每个阶段已经经过的时间
+        
+        // 新增：加时减时累计记录 - 修复：分别记录加时和减时
+        let phaseAddTimeRecords = Array(phases.length).fill(0); // 记录每个阶段的加时累计
+        let phaseSubtractTimeRecords = Array(phases.length).fill(0); // 记录每个阶段的减时累计
 
         // 初始化阶段轮盘显示
         function initializePhaseCarousel() {
@@ -1282,21 +1773,19 @@
                 currentPhaseItem.classList.add('active');
             }
             
-            // 如果不是完成阶段，设置前一个和后一个阶段
-            if (!phases[currentPhase].isCompletion) {
-                // 设置前一个阶段
-                const prevPhase = currentPhase > 0 ? currentPhase - 1 : phases.length - 1;
-                const prevPhaseItem = document.getElementById(`phase-carousel-${prevPhase}`);
-                if (prevPhaseItem) {
-                    prevPhaseItem.classList.add('prev');
-                }
-                
-                // 设置后一个阶段
-                const nextPhase = currentPhase < phases.length - 1 ? currentPhase + 1 : 0;
-                const nextPhaseItem = document.getElementById(`phase-carousel-${nextPhase}`);
-                if (nextPhaseItem) {
-                    nextPhaseItem.classList.add('next');
-                }
+            // 设置前一个和后一个阶段
+            // 设置前一个阶段
+            const prevPhase = currentPhase > 0 ? currentPhase - 1 : phases.length - 1;
+            const prevPhaseItem = document.getElementById(`phase-carousel-${prevPhase}`);
+            if (prevPhaseItem) {
+                prevPhaseItem.classList.add('prev');
+            }
+            
+            // 设置后一个阶段
+            const nextPhase = currentPhase < phases.length - 1 ? currentPhase + 1 : 0;
+            const nextPhaseItem = document.getElementById(`phase-carousel-${nextPhase}`);
+            if (nextPhaseItem) {
+                nextPhaseItem.classList.add('next');
             }
             
             // 更新轮盘位置
@@ -1314,52 +1803,30 @@
 
         // 更新导航按钮显示状态
         function updateNavigationButtons() {
-            const isCompletionPhase = phases[currentPhase].isCompletion;
-            
-            // 如果是完成阶段，隐藏所有导航按钮
-            if (isCompletionPhase) {
-                carouselPrev.style.display = 'none';
-                carouselNext.style.display = 'none';
+            // 根据屏幕宽度决定显示哪种导航按钮
+            const isMobile = window.innerWidth <= 768;
+            if (isMobile) {
+                carouselPrev.style.display = 'flex';
+                carouselNext.style.display = 'flex';
                 carouselPrevVertical.style.display = 'none';
                 carouselNextVertical.style.display = 'none';
             } else {
-                // 根据屏幕宽度决定显示哪种导航按钮
-                const isMobile = window.innerWidth <= 768;
-                if (isMobile) {
-                    carouselPrev.style.display = 'flex';
-                    carouselNext.style.display = 'flex';
-                    carouselPrevVertical.style.display = 'none';
-                    carouselNextVertical.style.display = 'none';
-                } else {
-                    carouselPrev.style.display = 'none';
-                    carouselNext.style.display = 'none';
-                    carouselPrevVertical.style.display = 'flex';
-                    carouselNextVertical.style.display = 'flex';
-                }
+                carouselPrev.style.display = 'none';
+                carouselNext.style.display = 'none';
+                carouselPrevVertical.style.display = 'flex';
+                carouselNextVertical.style.display = 'flex';
             }
         }
 
         // 更新下一阶段指示器
         function updateNextPhaseIndicator() {
-            // 修复：如果是训练完成阶段，不显示箭头
-            if (phases[currentPhase].isCompletion) {
-                nextPhaseIndicatorElement.textContent = "已完成";
-            } else {
-                const nextPhaseIndex = currentPhase < phases.length - 1 ? currentPhase + 1 : 0;
-                nextPhaseIndicatorElement.textContent = `→${phases[nextPhaseIndex].name}`;
-            }
+            const nextPhaseIndex = currentPhase < phases.length - 1 ? currentPhase + 1 : 0;
+            nextPhaseIndicatorElement.textContent = `→${phases[nextPhaseIndex].name}`;
         }
 
         // 更新进度指示器
         function updateProgressIndicator() {
-            // 训练完成阶段不计入进度
-            const totalPhasesForProgress = phases.length - 1;
-            
-            if (phases[currentPhase].isCompletion) {
-                progressIndicatorElement.textContent = `${totalPhasesForProgress}/${totalPhasesForProgress}`;
-            } else {
-                progressIndicatorElement.textContent = `${currentPhase + 1}/${totalPhasesForProgress}`;
-            }
+            progressIndicatorElement.textContent = `${currentPhase + 1}/${phases.length}`;
         }
 
         // 更新轮盘位置
@@ -1390,15 +1857,57 @@
             if (!isRunning && !isPaused) {
                 timerStatusElement.textContent = "未开始";
                 timerStatusElement.style.color = "#FFC107";
+                timerStatusElement.style.backgroundColor = "rgba(255, 193, 7, 0.2)";
                 timerStatusElement.classList.add('pulsing');
             } else if (isPaused) {
                 timerStatusElement.textContent = "已暂停";
                 timerStatusElement.style.color = "#FF9800";
+                timerStatusElement.style.backgroundColor = "rgba(255, 152, 0, 0.2)";
                 timerStatusElement.classList.add('pulsing');
             } else {
                 timerStatusElement.textContent = "进行中";
                 timerStatusElement.style.color = "#4CAF50";
+                timerStatusElement.style.backgroundColor = "rgba(76, 175, 80, 0.2)";
                 timerStatusElement.classList.remove('pulsing');
+            }
+            
+            // 更新加时按钮状态
+            updateAddTimeButtonState();
+            
+            // 更新减时按钮状态
+            updateSubtractTimeButtonState();
+            
+            // 更新结束按钮状态
+            updateFinishButtonState();
+        }
+
+        // 更新加时按钮状态
+        function updateAddTimeButtonState() {
+            // 只有在运行中时才能加时
+            if (isRunning) {
+                addTimeBtn.disabled = false;
+            } else {
+                addTimeBtn.disabled = true;
+            }
+        }
+
+        // 更新减时按钮状态
+        function updateSubtractTimeButtonState() {
+            // 只有在运行中时才能减时（即使不足1分钟，也允许点击，但会在subtractTime中检查并提示）
+            if (isRunning) {
+                subtractTimeBtn.disabled = false;
+            } else {
+                subtractTimeBtn.disabled = true;
+            }
+        }
+
+        // 更新结束按钮状态
+        function updateFinishButtonState() {
+            // 只有在运行中或已暂停时才能结束
+            if (isRunning || isPaused) {
+                finishBtn.disabled = false;
+            } else {
+                finishBtn.disabled = true;
             }
         }
 
@@ -1421,18 +1930,14 @@
             totalTimerElement.textContent = `总时间: ${formatTime(totalSeconds)}`;
             
             // 更新当前阶段计时器
-            if (phases[currentPhase].isCompletion) {
-                // 完成阶段显示正计时
-                phaseTimerElement.textContent = formatTime(phaseSeconds);
-                phaseTimerElement.style.color = "#4CAF50";
-            } else {
-                // 其他阶段显示倒计时
-                phaseTimerElement.textContent = formatTime(phaseSeconds);
-                phaseTimerElement.style.color = "#fff";
-            }
+            phaseTimerElement.textContent = formatTime(phaseSeconds);
+            phaseTimerElement.style.color = "#fff";
             
             // 更新轮盘激活状态
             updateCarouselActivePhase();
+            
+            // 更新减时按钮状态
+            updateSubtractTimeButtonState();
         }
 
         // 初始化音频系统
@@ -1461,6 +1966,16 @@
                     // 使用更高的频率和更短的持续时间
                     warningData[i] = Math.sin(1500 * 2 * Math.PI * i / audioContext.sampleRate) * 
                                     Math.exp(-i / (0.1 * audioContext.sampleRate));
+                }
+                
+                // 创建每分钟提示音
+                const minuteLength = 0.3 * audioContext.sampleRate;
+                minuteSoundBuffer = audioContext.createBuffer(1, minuteLength, audioContext.sampleRate);
+                const minuteData = minuteSoundBuffer.getChannelData(0);
+                for (let i = 0; i < minuteLength; i++) {
+                    // 使用中等频率和较长的持续时间
+                    minuteData[i] = Math.sin(800 * 2 * Math.PI * i / audioContext.sampleRate) * 
+                                   Math.exp(-i / (0.2 * audioContext.sampleRate));
                 }
                 
                 // 创建庆祝音效（更欢快愉悦的音效）
@@ -1536,6 +2051,13 @@
             }
         }
 
+        // 播放每分钟提示音
+        function playMinuteSound() {
+            if (minuteSoundBuffer) {
+                playSound(minuteSoundBuffer);
+            }
+        }
+
         // 播放庆祝音效
         function playCelebrationSound() {
             if (celebrationSoundBuffer) {
@@ -1569,9 +2091,6 @@
 
         // 检查并播放语音提示
         function checkAndPlayTts() {
-            // 完成阶段不播放语音提示
-            if (phases[currentPhase].isCompletion) return;
-            
             // 查找当前阶段的语音提示
             const currentPhaseTts = ttsSettings.filter(tts => tts.phaseId === currentPhase);
             
@@ -1581,27 +2100,43 @@
                     speakText(tts.text);
                 }
             });
+            
+            // 每分钟播放特殊提示音
+            if (phaseSeconds % 60 === 0 && phaseSeconds > 0) {
+                playMinuteSound();
+            }
         }
 
         // 切换到指定阶段
         function switchToPhase(phaseIndex) {
             if (phaseIndex < 0 || phaseIndex >= phases.length) return;
             
-            // 如果是完成阶段，不允许切换
-            if (phases[phaseIndex].isCompletion && !phases[currentPhase].isCompletion) {
+            // 检查计时器是否在运行中
+            if (isRunning) {
+                showNotification("计时器运行中", "计时器运行中，请先重置计时器。", "warning");
                 return;
             }
             
+            // 记录当前阶段的结束时间
+            if (isRunning && currentPhase < phases.length) {
+                // 记录当前阶段的实际用时
+                const initialPhaseSeconds = phases[currentPhase].duration + phaseExtraTime[currentPhase];
+                phaseActualDurations[currentPhase] = initialPhaseSeconds - phaseSeconds;
+            }
+            
             currentPhase = phaseIndex;
-            phaseSeconds = phases[currentPhase].duration;
+            phaseSeconds = phases[currentPhase].duration + phaseExtraTime[currentPhase];
+            
+            // 记录新阶段的开始时间
+            if (isRunning) {
+                phaseStartTimes[currentPhase] = totalSeconds;
+            }
+            
             updatePhaseDisplay();
         }
 
         // 切换到上一阶段
         function previousPhase() {
-            // 如果是完成阶段，不允许切换
-            if (phases[currentPhase].isCompletion) return;
-            
             if (currentPhase > 0) {
                 switchToPhase(currentPhase - 1);
             } else {
@@ -1611,9 +2146,6 @@
 
         // 切换到下一阶段
         function nextPhase() {
-            // 如果是完成阶段，不允许切换
-            if (phases[currentPhase].isCompletion) return;
-            
             if (currentPhase < phases.length - 1) {
                 switchToPhase(currentPhase + 1);
             } else {
@@ -1648,27 +2180,25 @@
                         startTimeElement.textContent = `开始时间: ${timeString}`;
                         startTimeMobileElement.textContent = `开始时间: ${timeString}`;
                         
+                        // 记录每个阶段的开始时间
+                        phaseStartTimes[currentPhase] = totalSeconds;
+                        
                         startTimer(); // 倒计时结束后开始正式计时
                     }, 1000);
                 }
             }, 1000);
         }
 
-        // 计时器主函数
-        function updateTimer() {
+        // 阶段计时更新函数
+        function updatePhaseTimer() {
             if (!isRunning) return;
             
-            totalSeconds++;
-            
-            if (phases[currentPhase].isCompletion) {
-                // 完成阶段：正计时
-                phaseSeconds++;
-                
-                // 播放滴答声
-                playTickSound();
-            } else {
-                // 正常阶段：倒计时
+            // 只有在非暂停状态下，才更新阶段倒计时和检查语音提示等
+            if (!isPaused) {
                 phaseSeconds--;
+                
+                // 记录当前阶段的经过时间
+                phaseElapsedTime[currentPhase]++;
                 
                 // 播放滴答声
                 playTickSound();
@@ -1681,32 +2211,30 @@
                     // 播放警告声作为阶段结束提示
                     playWarningSound();
                     
-                    // 修复：在切换到训练完成阶段时记录结束时间
-                    if (currentPhase === phases.length - 2) { // 如果当前是放松拉伸阶段（倒数第二个阶段）
-                        endTimestamp = new Date();
-                        const timeString = endTimestamp.toLocaleTimeString();
-                        endTimeElement.textContent = `结束时间: ${timeString}`;
-                        endTimeMobileElement.textContent = `结束时间: ${timeString}`;
-                    }
+                    // 记录当前阶段的实际用时
+                    const initialPhaseSeconds = phases[currentPhase].duration + phaseExtraTime[currentPhase];
+                    phaseActualDurations[currentPhase] = initialPhaseSeconds;
+                    phaseActualTimeRecords[currentPhase] = initialPhaseSeconds; // 记录实际用时
                     
                     // 切换到下一个阶段
                     currentPhase++;
                     
                     if (currentPhase >= phases.length) {
                         // 所有阶段完成
-                        currentPhase = phases.length - 1; // 保持在完成阶段
+                        currentPhase = phases.length - 1; // 保持在最后一个阶段
                         phaseSeconds = 0;
                         
-                        // 播放庆祝音效
-                        playCelebrationSound();
+                        // 自动停止计时
+                        finishTraining();
                     } else {
-                        // 重置阶段时间
-                        phaseSeconds = phases[currentPhase].duration;
+                        // 记录新阶段的开始时间
+                        phaseStartTimes[currentPhase] = totalSeconds;
                         
-                        // 如果切换到训练完成阶段，播放庆祝音效
-                        if (phases[currentPhase].isCompletion) {
-                            playCelebrationSound();
-                        }
+                        // 重置阶段时间
+                        phaseSeconds = phases[currentPhase].duration + phaseExtraTime[currentPhase];
+                        
+                        // 重置新阶段的经过时间
+                        phaseElapsedTime[currentPhase] = 0;
                     }
                 }
                 
@@ -1720,6 +2248,14 @@
             updatePhaseDisplay();
         }
 
+        // 总计时更新函数（独立运行）
+        function updateTotalTimer() {
+            if (isRunning || isPaused) {
+                totalSeconds++;
+                updatePhaseDisplay(); // 更新显示
+            }
+        }
+
         // 开始计时器
         function startTimer() {
             if (isRunning) return;
@@ -1727,13 +2263,27 @@
             isRunning = true;
             isPaused = false;
             
+            // 如果是从暂停状态恢复，需要记录暂停结束时间
+            if (pauseStartTime) {
+                const pauseEndTime = new Date();
+                const pauseDuration = Math.floor((pauseEndTime - pauseStartTime) / 1000);
+                phasePauseTimes[currentPhase] += pauseDuration;
+                pauseStartTime = null;
+            }
+            
             startBtn.disabled = true;
             pauseBtn.disabled = false;
             resetBtn.disabled = false;
             
             updateTimerStatus();
             
-            timerInterval = setInterval(updateTimer, 1000);
+            // 启动阶段计时器
+            timerInterval = setInterval(updatePhaseTimer, 1000);
+            
+            // 启动独立的总计时器（如果还没有启动）
+            if (!totalTimerInterval) {
+                totalTimerInterval = setInterval(updateTotalTimer, 1000);
+            }
         }
 
         // 暂停计时器
@@ -1743,7 +2293,10 @@
             isRunning = false;
             isPaused = true;
             
-            clearInterval(timerInterval);
+            clearInterval(timerInterval); // 只停止阶段计时器
+            
+            // 记录暂停开始时间
+            pauseStartTime = new Date();
             
             startBtn.disabled = false;
             pauseBtn.disabled = true;
@@ -1759,6 +2312,14 @@
             
             clearInterval(timerInterval);
             
+            // 如果暂停状态下停止，需要记录暂停结束时间
+            if (pauseStartTime) {
+                const pauseEndTime = new Date();
+                const pauseDuration = Math.floor((pauseEndTime - pauseStartTime) / 1000);
+                phasePauseTimes[currentPhase] += pauseDuration;
+                pauseStartTime = null;
+            }
+            
             startBtn.disabled = false;
             pauseBtn.disabled = true;
             resetBtn.disabled = true;
@@ -1771,6 +2332,12 @@
         function resetTimer() {
             stopTimer();
             
+            // 停止总计时器
+            if (totalTimerInterval) {
+                clearInterval(totalTimerInterval);
+                totalTimerInterval = null;
+            }
+            
             currentPhase = 0;
             totalSeconds = 0;
             phaseSeconds = phases[0].duration;
@@ -1781,13 +2348,439 @@
             startTimeMobileElement.textContent = "开始时间: --:--:--";
             endTimeMobileElement.textContent = "结束时间: --:--:--";
             
+            // 重置加时记录 - 修复：同时重置加时减时记录
+            phaseExtraTime = Array(phases.length).fill(0);
+            phaseStartTimes = Array(phases.length).fill(null);
+            phaseActualDurations = Array(phases.length).fill(0);
+            phasePauseTimes = Array(phases.length).fill(0);
+            phaseElapsedSeconds = Array(phases.length).fill(0);
+            phaseActualTimeRecords = Array(phases.length).fill(0);
+            phaseElapsedTime = Array(phases.length).fill(0);
+            phaseAddTimeRecords = Array(phases.length).fill(0); // 重置加时记录
+            phaseSubtractTimeRecords = Array(phases.length).fill(0); // 重置减时记录
+            pauseStartTime = null;
+            
             updatePhaseDisplay();
+        }
+
+        // 加时功能 - 修复：正确记录加时时间
+        function addTime() {
+            if (!isRunning) return;
+            
+            
+            // 为当前阶段增加1分钟
+            phaseExtraTime[currentPhase] += 60;
+            phaseSeconds += 60;
+            
+            // 记录加时累计
+            phaseAddTimeRecords[currentPhase] += 60;
+            
+            // 显示加时提示
+            showTimeAdjustmentMessage("+1分钟", "add");
+            
+            // 更新显示
+            updatePhaseDisplay();
+        }
+
+        // 减时功能 - 修复：正确记录减时时间
+        function subtractTime() {
+            if (!isRunning) return;
+            
+            // 检查阶段剩余时间是否大于1分钟
+            if (phaseSeconds <= 60) {
+                showNotification("减时失败", "阶段剩余时间不足1分钟，无法减时", "warning");
+                return;
+            }
+            
+            // 为当前阶段减少1分钟
+            phaseExtraTime[currentPhase] -= 60;
+            phaseSeconds -= 60;
+            
+            // 记录减时累计
+            phaseSubtractTimeRecords[currentPhase] += 60;
+            
+            // 显示减时提示
+            showTimeAdjustmentMessage("-1分钟", "subtract");
+            
+            // 更新显示
+            updatePhaseDisplay();
+        }
+
+        // 显示时间调整提示
+        function showTimeAdjustmentMessage(message, type) {
+            timeAdjustmentMessage.textContent = message;
+            
+            // 设置样式
+            if (type === "add") {
+                timeAdjustmentMessage.classList.remove("subtract");
+            } else {
+                timeAdjustmentMessage.classList.add("subtract");
+            }
+            
+            timeAdjustmentMessage.classList.add('show');
+            
+            setTimeout(() => {
+                timeAdjustmentMessage.classList.remove('show');
+            }, 2000);
+        }
+
+        // 创建烟花效果
+        function createFireworks() {
+            fireworksContainer.innerHTML = '';
+            
+            // 创建多个烟花粒子
+            for (let i = 0; i < 150; i++) {
+                const firework = document.createElement('div');
+                firework.className = 'firework';
+                
+                // 随机设置粒子的位置和颜色
+                const angle = Math.random() * Math.PI * 2;
+                const distance = 100 + Math.random() * 400;
+                const x = Math.cos(angle) * distance;
+                const y = Math.sin(angle) * distance;
+                
+                firework.style.setProperty('--x', `${x}px`);
+                firework.style.setProperty('--y', `${y}px`);
+                
+                // 随机颜色
+                const colors = ['#fdbb2d', '#ff5e62', '#ff9966', '#ff5e9e', '#c56cf0'];
+                firework.style.background = colors[Math.floor(Math.random() * colors.length)];
+                
+                // 随机延迟
+                firework.style.animationDelay = `${Math.random() * 0.5}s`;
+                
+                fireworksContainer.appendChild(firework);
+            }
+            
+            // 显示烟花效果和文字
+            fireworksOverlay.classList.add('active');
+            
+            // 播放庆祝音效
+            playCelebrationSound();
+            
+            // 播放语音提示
+            speakText("恭喜完成训练！太棒啦！");
+            
+            // 3秒后显示报告
+            setTimeout(() => {
+                fireworksOverlay.classList.remove('active');
+                generateReport();
+            }, 3000);
+        }
+
+        // 结束训练并生成报告
+        function finishTraining() {
+            if (!isRunning && !isPaused) return;
+            
+            // 停止计时器
+            stopTimer();
+            
+            // 记录结束时间
+            endTimestamp = new Date();
+            const timeString = endTimestamp.toLocaleTimeString();
+            endTimeElement.textContent = `结束时间: ${timeString}`;
+            endTimeMobileElement.textContent = `结束时间: ${timeString}`;
+            
+            // 记录当前阶段的实际用时
+            if (currentPhase < phases.length) {
+                const initialPhaseSeconds = phases[currentPhase].duration + phaseExtraTime[currentPhase];
+                phaseActualDurations[currentPhase] = initialPhaseSeconds - phaseSeconds;
+                phaseActualTimeRecords[currentPhase] = initialPhaseSeconds - phaseSeconds; // 记录实际用时
+            }
+            
+            // 显示烟花庆祝效果
+            createFireworks();
+        }
+
+        // 将时间字符串转换为秒数
+        function parseTimeString(timeStr) {
+            if (timeStr === "-") return 0;
+            
+            const parts = timeStr.split(':');
+            if (parts.length === 3) {
+                // 格式: hh:mm:ss
+                return parseInt(parts[0]) * 3600 + parseInt(parts[1]) * 60 + parseInt(parts[2]);
+            } else if (parts.length === 2) {
+                // 格式: mm:ss
+                return parseInt(parts[0]) * 60 + parseInt(parts[1]);
+            }
+            return 0;
+        }
+
+        // 生成报告 - 修复：使用正确的加时减时记录
+        function generateReport() {
+            // 计算运动计划时间（所有阶段时间之和）
+            let plannedTime = 0;
+            for (let i = 0; i < phases.length; i++) {
+                plannedTime += phases[i].duration;
+            }
+            
+            // 实际运动时间使用总计时记录的时间
+            let actualTime = totalSeconds;
+            
+            // 更新报告标题，添加日期
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            reportTitle.textContent = `${year}年${month}月${day}日 运动执行情况报告`;
+            
+            // 更新报告摘要
+            document.getElementById('reportStartTime').textContent = startTimestamp ? startTimestamp.toLocaleTimeString() : '--:--:--';
+            document.getElementById('reportEndTime').textContent = endTimestamp ? endTimestamp.toLocaleTimeString() : '--:--:--';
+            document.getElementById('reportPlannedTime').textContent = formatTime(plannedTime);
+            document.getElementById('reportActualTime').textContent = formatTime(actualTime);
+            
+            // 更新报告表格
+            const reportTableBody = document.getElementById('reportTableBody');
+            reportTableBody.innerHTML = '';
+            
+            // 初始化总计变量
+            let totalPlannedTime = 0;
+            let totalActualTime = 0;
+            let totalExtraTime = 0;
+            let totalSubtractTime = 0;
+            let totalPauseTime = 0;
+            
+            // 先添加总计行
+            const totalRow = document.createElement('tr');
+            totalRow.className = 'total-row'; // 添加总计行样式类
+            
+            const totalNameCell = document.createElement('td');
+            totalNameCell.textContent = '总计';
+            
+            const totalPlannedCell = document.createElement('td');
+            totalPlannedCell.textContent = formatTime(totalPlannedTime);
+            
+            const totalActualCell = document.createElement('td');
+            totalActualCell.textContent = formatTime(totalActualTime);
+            totalActualCell.classList.add('actual-time-purple');
+            
+            const totalExtraCell = document.createElement('td');
+            totalExtraCell.textContent = totalExtraTime > 0 ? formatTime(totalExtraTime) : '-';
+            if (totalExtraTime > 0) {
+                totalExtraCell.classList.add('extra-time-red');
+            }
+            
+            const totalSubtractCell = document.createElement('td');
+            totalSubtractCell.textContent = totalSubtractTime > 0 ? '-' + formatTime(totalSubtractTime) : '-';
+            if (totalSubtractTime > 0) {
+                totalSubtractCell.classList.add('subtract-time-green');
+            }
+            
+            const totalPauseCell = document.createElement('td');
+            totalPauseCell.textContent = totalPauseTime > 0 ? formatTime(totalPauseTime) : '-';
+            
+            const totalPerformanceCell = document.createElement('td');
+            totalPerformanceCell.textContent = '-';
+            
+            totalRow.appendChild(totalNameCell);
+            totalRow.appendChild(totalPlannedCell);
+            totalRow.appendChild(totalActualCell);
+            totalRow.appendChild(totalExtraCell);
+            totalRow.appendChild(totalSubtractCell);
+            totalRow.appendChild(totalPauseCell);
+            totalRow.appendChild(totalPerformanceCell);
+            
+            reportTableBody.appendChild(totalRow);
+            
+            // 添加各阶段行
+            for (let i = 0; i < phases.length; i++) {
+                const phase = phases[i];
+                const row = document.createElement('tr');
+                
+                // 阶段名称
+                const nameCell = document.createElement('td');
+                nameCell.textContent = phase.name;
+                
+                // 计划用时
+                const plannedCell = document.createElement('td');
+                plannedCell.textContent = formatTime(phase.duration);
+                totalPlannedTime += phase.duration;
+                
+                // 实际用时 - 使用阶段实际用时记录
+                const actualCell = document.createElement('td');
+                // 优先使用 phaseActualTimeRecords，如果没有则使用 phaseElapsedTime
+                const actualDuration = phaseActualTimeRecords[i] > 0 ? phaseActualTimeRecords[i] : phaseElapsedTime[i];
+                actualCell.textContent = formatTime(actualDuration);
+                actualCell.classList.add('actual-time-purple');
+                totalActualTime += actualDuration;
+                
+                // 加时时间 - 修复：使用 phaseAddTimeRecords 而不是 phaseExtraTime
+                const extraCell = document.createElement('td');
+                if (phaseAddTimeRecords[i] > 0) {
+                    extraCell.textContent = formatTime(phaseAddTimeRecords[i]);
+                    extraCell.classList.add('extra-time-red');
+                    totalExtraTime += phaseAddTimeRecords[i];
+                } else {
+                    extraCell.textContent = "-";
+                }
+                
+                // 减时时间 - 修复：使用 phaseSubtractTimeRecords 而不是 phaseExtraTime
+                const subtractCell = document.createElement('td');
+                if (phaseSubtractTimeRecords[i] > 0) {
+                    subtractCell.textContent = '-' + formatTime(phaseSubtractTimeRecords[i]);
+                    subtractCell.classList.add('subtract-time-green');
+                    totalSubtractTime += phaseSubtractTimeRecords[i];
+                } else {
+                    subtractCell.textContent = "-";
+                }
+                
+                // 暂停时间
+                const pauseCell = document.createElement('td');
+                if (phasePauseTimes[i] > 0) {
+                    pauseCell.textContent = formatTime(phasePauseTimes[i]);
+                    totalPauseTime += phasePauseTimes[i];
+                } else {
+                    pauseCell.textContent = "-";
+                }
+                
+                // 完成程度
+                const performanceCell = document.createElement('td');
+                const actualDurationValue = actualDuration || 0;
+                const plannedDuration = phase.duration;
+                const timeDiff = actualDurationValue - plannedDuration;
+                const timeDiffMinutes = Math.abs(timeDiff) / 60;
+                
+                let performanceText, performanceClass;
+                
+                if (actualDurationValue < 60) {
+                    performanceText = "未训练";
+                    performanceClass = "performance-untrained";
+                } else if (timeDiff >= 0) {
+                    // 实际用时大于计划用时
+                    if (timeDiffMinutes <= 1) {
+                        performanceText = "优秀";
+                        performanceClass = "performance-excellent";
+                    } else if (timeDiffMinutes <= 3) {
+                        performanceText = "勉强";
+                        performanceClass = "performance-fair";
+                    } else if (timeDiffMinutes <= 8) {
+                        performanceText = "吃力";
+                        performanceClass = "performance-hard";
+                    } else {
+                        performanceText = "超强度";
+                        performanceClass = "performance-extreme";
+                    }
+                } else {
+                    // 实际用时小于计划用时
+                    if (timeDiffMinutes <= 1) {
+                        performanceText = "优秀";
+                        performanceClass = "performance-excellent";
+                    } else if (timeDiffMinutes <= 3) {
+                        performanceText = "一般";
+                        performanceClass = "performance-general";
+                    } else {
+                        performanceText = "缩减版";
+                        performanceClass = "performance-reduced";
+                    }
+                }
+                
+                performanceCell.textContent = performanceText;
+                performanceCell.className = performanceClass;
+                
+                row.appendChild(nameCell);
+                row.appendChild(plannedCell);
+                row.appendChild(actualCell);
+                row.appendChild(extraCell);
+                row.appendChild(subtractCell);
+                row.appendChild(pauseCell);
+                row.appendChild(performanceCell);
+                
+                reportTableBody.appendChild(row);
+            }
+            
+            // 更新总计行的数据
+            totalPlannedCell.textContent = formatTime(totalPlannedTime);
+            totalActualCell.textContent = formatTime(totalActualTime);
+            totalExtraCell.textContent = totalExtraTime > 0 ? formatTime(totalExtraTime) : '-';
+            totalSubtractCell.textContent = totalSubtractTime > 0 ? '-' + formatTime(totalSubtractTime) : '-';
+            totalPauseCell.textContent = totalPauseTime > 0 ? formatTime(totalPauseTime) : '-';
+            
+            // 计算总计行的完成程度
+            const totalTimeDiff = totalActualTime - totalPlannedTime;
+            const totalTimeDiffMinutes = Math.abs(totalTimeDiff) / 60;
+            
+            let totalPerformanceText, totalPerformanceClass;
+            
+            if (totalActualTime < 60) {
+                totalPerformanceText = "未训练";
+                totalPerformanceClass = "performance-untrained";
+            } else if (totalTimeDiff >= 0) {
+                // 实际用时大于计划用时
+                if (totalTimeDiffMinutes <= 1) {
+                    totalPerformanceText = "优秀";
+                    totalPerformanceClass = "performance-excellent";
+                } else if (totalTimeDiffMinutes <= 3) {
+                    totalPerformanceText = "勉强";
+                    totalPerformanceClass = "performance-fair";
+                } else if (totalTimeDiffMinutes <= 8) {
+                    totalPerformanceText = "吃力";
+                    totalPerformanceClass = "performance-hard";
+                } else {
+                    totalPerformanceText = "超强度";
+                    totalPerformanceClass = "performance-extreme";
+                }
+            } else {
+                // 实际用时小于计划用时
+                if (totalTimeDiffMinutes <= 1) {
+                    totalPerformanceText = "优秀";
+                    totalPerformanceClass = "performance-excellent";
+                } else if (totalTimeDiffMinutes <= 3) {
+                    totalPerformanceText = "一般";
+                    totalPerformanceClass = "performance-general";
+                } else {
+                    totalPerformanceText = "缩减版";
+                    totalPerformanceClass = "performance-reduced";
+                }
+            }
+            
+            totalPerformanceCell.textContent = totalPerformanceText;
+            totalPerformanceCell.className = totalPerformanceClass;
+            
+            // 显示报告模态框
+            reportModal.style.display = 'flex';
+        }
+
+        // 自定义通知函数
+        function showNotification(title, message, type = "info") {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            
+            const titleElement = document.createElement('div');
+            titleElement.className = 'notification-title';
+            titleElement.textContent = title;
+            
+            const messageElement = document.createElement('div');
+            messageElement.className = 'notification-message';
+            messageElement.textContent = message;
+            
+            notification.appendChild(titleElement);
+            notification.appendChild(messageElement);
+            
+            notificationContainer.appendChild(notification);
+            
+            // 显示通知
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 10);
+            
+            // 3秒后自动隐藏
+            setTimeout(() => {
+                notification.classList.remove('show');
+                notification.classList.add('hide');
+                
+                // 完全移除通知
+                setTimeout(() => {
+                    notification.remove();
+                }, 300);
+            }, 3000);
         }
 
         // 打开编辑阶段模态框
         function openEditPhasesModal() {
             if (isRunning) {
-                alert("计时器运行时不能编辑阶段，请先暂停或重置计时器。");
+                showNotification("编辑阶段", "计时器运行时不能编辑各阶段，请先重置计时器。", "warning");
                 return;
             }
             
@@ -1808,13 +2801,11 @@
                 phaseNameSpan.textContent = `${index + 1}. ${phase.name}`;
                 phaseTitle.appendChild(phaseNameSpan);
                 
-                // 添加阶段时间显示（训练完成阶段除外）
-                if (!phase.isCompletion) {
-                    const phaseDurationSpan = document.createElement('span');
-                    phaseDurationSpan.className = 'phase-duration-display';
-                    phaseDurationSpan.textContent = `${Math.floor(phase.duration / 60)} 分钟`;
-                    phaseTitle.appendChild(phaseDurationSpan);
-                }
+                // 添加阶段时间显示
+                const phaseDurationSpan = document.createElement('span');
+                phaseDurationSpan.className = 'phase-duration-display';
+                phaseDurationSpan.textContent = `${Math.floor(phase.duration / 60)} 分钟`;
+                phaseTitle.appendChild(phaseDurationSpan);
                 
                 const toggleBtn = document.createElement('button');
                 toggleBtn.className = 'toggle-btn';
@@ -1854,21 +2845,15 @@
                 durationInput.dataset.index = index;
                 durationInput.dataset.field = 'duration';
                 
-                // 完成阶段不显示删除按钮，并禁用持续时间输入
-                if (phase.isCompletion) {
-                    durationInput.disabled = true;
-                    durationInput.value = 0;
-                }
-                
                 const deleteBtn = document.createElement('button');
                 deleteBtn.className = 'delete-phase-btn';
                 deleteBtn.textContent = '删除阶段';
                 deleteBtn.addEventListener('click', () => {
-                    if (phases.length > 2) { // 至少保留两个阶段（一个普通阶段+完成阶段）
+                    if (phases.length > 1) { // 至少保留一个阶段
                         phases.splice(index, 1);
                         openEditPhasesModal(); // 重新渲染
                     } else {
-                        alert('至少需要保留一个训练阶段');
+                        showNotification("删除阶段", "至少需要保留一个训练阶段", "warning");
                     }
                 });
                 
@@ -1878,11 +2863,7 @@
                 phaseContent.appendChild(descInput);
                 phaseContent.appendChild(durationLabel);
                 phaseContent.appendChild(durationInput);
-                
-                // 完成阶段不显示删除按钮
-                if (!phase.isCompletion) {
-                    phaseContent.appendChild(deleteBtn);
-                }
+                phaseContent.appendChild(deleteBtn);
                 
                 phaseEditDiv.appendChild(phaseHeader);
                 phaseEditDiv.appendChild(phaseContent);
@@ -1901,15 +2882,13 @@
                 });
                 
                 // 添加持续时间输入变化事件，更新阶段标题中的时间显示
-                if (!phase.isCompletion) {
-                    durationInput.addEventListener('input', () => {
-                        const minutes = durationInput.value;
-                        const durationSpan = phaseTitle.querySelector('.phase-duration-display');
-                        if (durationSpan) {
-                            durationSpan.textContent = `${minutes} 分钟`;
-                        }
-                    });
-                }
+                durationInput.addEventListener('input', () => {
+                    const minutes = durationInput.value;
+                    const durationSpan = phaseTitle.querySelector('.phase-duration-display');
+                    if (durationSpan) {
+                        durationSpan.textContent = `${minutes} 分钟`;
+                    }
+                });
             });
             
             editPhasesModal.style.display = 'flex';
@@ -1918,6 +2897,10 @@
         // 保存阶段编辑
         function savePhasesEdit() {
             let hasError = false;
+            let hasChanges = false;
+            
+            // 创建阶段数据的深拷贝用于比较
+            const originalPhases = JSON.parse(JSON.stringify(phases));
             
             const inputs = phasesEditContainer.querySelectorAll('input');
 
@@ -1925,12 +2908,6 @@
             inputs.forEach(input => {
                 const field = input.dataset.field;
                 const index = parseInt(input.dataset.index);
-                const phase = phases[index];
-
-                // 如果是完成阶段，跳过持续时间的验证
-                if (field === 'duration' && phase.isCompletion) {
-                    return;
-                }
 
                 if (field === 'duration') {
                     const minutes = parseInt(input.value);
@@ -1946,7 +2923,33 @@
             
             // 如果有错误，提示用户
             if (hasError) {
-                alert("请输入1-120之间的有效分钟数");
+                showNotification("输入错误", "请输入1-120之间的有效分钟数", "warning");
+                return;
+            }
+            
+            // 检查是否有更改
+            inputs.forEach(input => {
+                const index = parseInt(input.dataset.index);
+                const field = input.dataset.field;
+                const value = input.value;
+                
+                if (field === 'duration') {
+                    const minutes = parseInt(value);
+                    const originalMinutes = Math.floor(originalPhases[index].duration / 60);
+                    if (minutes !== originalMinutes) {
+                        hasChanges = true;
+                    }
+                } else {
+                    if (value !== originalPhases[index][field]) {
+                        hasChanges = true;
+                    }
+                }
+            });
+            
+            // 如果没有更改，则直接关闭模态框并提示
+            if (!hasChanges) {
+                editPhasesModal.style.display = 'none';
+                showNotification("无更改", "阶段设置没有更改", "info");
                 return;
             }
             
@@ -1954,12 +2957,6 @@
             inputs.forEach(input => {
                 const index = parseInt(input.dataset.index);
                 const field = input.dataset.field;
-                const phase = phases[index];
-                
-                // 如果是完成阶段，跳过持续时间的修改
-                if (field === 'duration' && phase.isCompletion) {
-                    return;
-                }
                 
                 if (field === 'duration') {
                     const minutes = parseInt(input.value);
@@ -1969,23 +2966,20 @@
                 }
             });
             
-            // 重置当前阶段和计时器
-            currentPhase = 0;
-            phaseSeconds = phases[0].duration;
-            totalSeconds = 0;
+            // 更新当前阶段的剩余时间，但不重置其他状态
+            phaseSeconds = phases[currentPhase].duration + phaseExtraTime[currentPhase];
             
             // 更新显示
             initializePhaseCarousel();
             updatePhaseDisplay();
 
             editPhasesModal.style.display = 'none';
-
+            showNotification("保存成功", "阶段设置已成功更新，请注意相关的语音提示", "info");
         }
 
         // 添加新阶段
         function addNewPhase() {
-            // 在完成阶段之前插入新阶段
-            phases.splice(phases.length - 1, 0, {
+            phases.push({
                 name: "新阶段",
                 duration: 5 * 60,
                 description: "阶段描述"
@@ -2058,32 +3052,65 @@
 
         // 打开语音设置模态框
         function openTtsSettingsModal() {
-            ttsTableBody.innerHTML = '';
+            // 检查计时器是否在运行中
+            if (isRunning) {
+                showNotification("计时器运行中", "计时器运行中，请先暂停或重置计时器。", "warning");
+                return;
+            }
+            
+            ttsEditContainer.innerHTML = '';
             
             ttsSettings.forEach((tts, index) => {
-                const row = document.createElement('tr');
+                const ttsEditDiv = document.createElement('div');
+                ttsEditDiv.className = 'tts-edit-item';
                 
-                // 阶段选择
-                const phaseCell = document.createElement('td');
+                const ttsHeader = document.createElement('div');
+                ttsHeader.className = 'tts-edit-header';
+                
+                const ttsTitle = document.createElement('div');
+                ttsTitle.className = 'tts-edit-title';
+                
+                // 修改：添加阶段名称和序号，去掉文字显示
+                const phaseName = phases[tts.phaseId] ? phases[tts.phaseId].name : '未知阶段';
+                const ttsNameSpan = document.createElement('span');
+                ttsNameSpan.textContent = `${index + 1}. ${phaseName}-阶段${tts.phaseId + 1}`;
+                ttsTitle.appendChild(ttsNameSpan);
+                
+                // 添加时间点显示
+                const ttsTimepointSpan = document.createElement('span');
+                ttsTimepointSpan.className = 'tts-timepoint-display';
+                ttsTimepointSpan.textContent = `${tts.timePoint} 秒`;
+                ttsTitle.appendChild(ttsTimepointSpan);
+                
+                const toggleBtn = document.createElement('button');
+                toggleBtn.className = 'toggle-btn';
+                toggleBtn.textContent = '▼';
+                toggleBtn.dataset.index = index;
+                
+                ttsHeader.appendChild(ttsTitle);
+                ttsHeader.appendChild(toggleBtn);
+                
+                const ttsContent = document.createElement('div');
+                ttsContent.className = 'tts-edit-content';
+                ttsContent.id = `tts-content-${index}`;
+                
+                const phaseLabel = document.createElement('label');
+                phaseLabel.textContent = '阶段:';
                 const phaseSelect = document.createElement('select');
                 phases.forEach((phase, phaseIndex) => {
-                    // 完成阶段不显示在语音设置中
-                    if (!phase.isCompletion) {
-                        const option = document.createElement('option');
-                        option.value = phaseIndex;
-                        option.textContent = phase.name;
-                        if (phaseIndex === tts.phaseId) {
-                            option.selected = true;
-                        }
-                        phaseSelect.appendChild(option);
+                    const option = document.createElement('option');
+                    option.value = phaseIndex;
+                    option.textContent = phase.name;
+                    if (phaseIndex === tts.phaseId) {
+                        option.selected = true;
                     }
+                    phaseSelect.appendChild(option);
                 });
                 phaseSelect.dataset.index = index;
                 phaseSelect.dataset.field = 'phaseId';
-                phaseCell.appendChild(phaseSelect);
                 
-                // 时间点输入
-                const timeCell = document.createElement('td');
+                const timeLabel = document.createElement('label');
+                timeLabel.textContent = '时间点 (秒):';
                 const timeInput = document.createElement('input');
                 timeInput.type = 'number';
                 timeInput.min = '1';
@@ -2091,34 +3118,77 @@
                 timeInput.value = tts.timePoint;
                 timeInput.dataset.index = index;
                 timeInput.dataset.field = 'timePoint';
-                timeCell.appendChild(timeInput);
                 
-                // 文本内容输入
-                const textCell = document.createElement('td');
+                const textLabel = document.createElement('label');
+                textLabel.textContent = '语音内容:';
                 const textInput = document.createElement('input');
                 textInput.type = 'text';
                 textInput.value = tts.text;
                 textInput.dataset.index = index;
                 textInput.dataset.field = 'text';
-                textCell.appendChild(textInput);
                 
-                // 操作按钮
-                const actionCell = document.createElement('td');
+                // 修改：动态调整输入框大小以显示完整内容
+                textInput.style.width = '100%';
+                textInput.style.minWidth = '100%';
+                textInput.addEventListener('input', function() {
+                    this.style.width = '100%';
+                    this.style.width = (this.scrollWidth) + 'px';
+                });
+                // 初始设置
+                setTimeout(() => {
+                    textInput.style.width = (textInput.scrollWidth) + 'px';
+                }, 0);
+                
                 const deleteBtn = document.createElement('button');
-                deleteBtn.textContent = '删除';
-                deleteBtn.style.backgroundColor = '#F44336';
+                deleteBtn.className = 'delete-tts-btn';
+                deleteBtn.textContent = '删除语音提示';
                 deleteBtn.addEventListener('click', () => {
                     ttsSettings.splice(index, 1);
                     openTtsSettingsModal(); // 重新渲染
                 });
-                actionCell.appendChild(deleteBtn);
                 
-                row.appendChild(phaseCell);
-                row.appendChild(timeCell);
-                row.appendChild(textCell);
-                row.appendChild(actionCell);
+                ttsContent.appendChild(phaseLabel);
+                ttsContent.appendChild(phaseSelect);
+                ttsContent.appendChild(timeLabel);
+                ttsContent.appendChild(timeInput);
+                ttsContent.appendChild(textLabel);
+                ttsContent.appendChild(textInput);
+                ttsContent.appendChild(deleteBtn);
                 
-                ttsTableBody.appendChild(row);
+                ttsEditDiv.appendChild(ttsHeader);
+                ttsEditDiv.appendChild(ttsContent);
+                ttsEditContainer.appendChild(ttsEditDiv);
+                
+                // 添加点击事件
+                toggleBtn.addEventListener('click', () => {
+                    const content = document.getElementById(`tts-content-${index}`);
+                    if (content.classList.contains('show')) {
+                        content.classList.remove('show');
+                        toggleBtn.textContent = '▼';
+                    } else {
+                        content.classList.add('show');
+                        toggleBtn.textContent = '▲';
+                    }
+                });
+                
+                // 添加时间点输入变化事件，更新标题中的时间显示
+                timeInput.addEventListener('input', () => {
+                    const seconds = timeInput.value;
+                    const timepointSpan = ttsTitle.querySelector('.tts-timepoint-display');
+                    if (timepointSpan) {
+                        timepointSpan.textContent = `${seconds} 秒`;
+                    }
+                });
+                
+                // 添加阶段选择变化事件，更新标题中的阶段名称
+                phaseSelect.addEventListener('change', () => {
+                    const selectedPhaseId = parseInt(phaseSelect.value);
+                    const phaseName = phases[selectedPhaseId] ? phases[selectedPhaseId].name : '未知阶段';
+                    const nameSpan = ttsTitle.querySelector('span:first-child');
+                    if (nameSpan) {
+                        nameSpan.textContent = `${index + 1}. ${phaseName}-阶段${selectedPhaseId + 1}`;
+                    }
+                });
             });
             
             ttsSettingsModal.style.display = 'flex';
@@ -2126,7 +3196,7 @@
 
         // 保存语音设置
         function saveTtsSettings() {
-            const inputs = ttsTableBody.querySelectorAll('select, input');
+            const inputs = ttsEditContainer.querySelectorAll('select, input');
             const newTtsSettings = [];
             
             inputs.forEach(input => {
@@ -2146,6 +3216,7 @@
             
             ttsSettings = newTtsSettings;
             ttsSettingsModal.style.display = 'none';
+            showNotification("保存成功", "语音设置已成功更新", "info");
         }
 
         // 添加新的语音提示
@@ -2182,6 +3253,59 @@
             });
             pauseBtn.addEventListener('click', pauseTimer);
             resetBtn.addEventListener('click', resetTimer);
+            addTimeBtn.addEventListener('click', addTime);
+            subtractTimeBtn.addEventListener('click', subtractTime);
+            finishBtn.addEventListener('click', finishTraining);
+            
+            // 为按钮添加点击反馈效果
+            const controlButtons = document.querySelectorAll('#subtractTimeBtn, #addTimeBtn, #startBtn, #pauseBtn, #resetBtn, #finishBtn');
+            controlButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    // 创建涟漪效果
+                    const ripple = document.createElement('span');
+                    const rect = this.getBoundingClientRect();
+                    const size = Math.max(rect.width, rect.height);
+                    const x = e.clientX - rect.left - size / 2;
+                    const y = e.clientY - rect.top - size / 2;
+                    
+                    ripple.style.cssText = `
+                        position: absolute;
+                        border-radius: 50%;
+                        background: rgba(255, 255, 255, 0.6);
+                        transform: scale(0);
+                        animation: ripple 600ms linear;
+                        width: ${size}px;
+                        height: ${size}px;
+                        top: ${y}px;
+                        left: ${x}px;
+                    `;
+                    
+                    this.appendChild(ripple);
+                    
+                    setTimeout(() => {
+                        ripple.remove();
+                    }, 600);
+                });
+            });
+            
+            // 为阶段切换按钮添加点击效果
+            const carouselButtons = document.querySelectorAll('.carousel-nav, .carousel-nav-vertical');
+            carouselButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    
+                    this.style.transform = 'scale(0.9)';
+                    if (this.classList.contains('carousel-nav-vertical')) {
+                        this.style.transform = 'translateX(-50%) scale(0.9)';
+                    }
+                    
+                    setTimeout(() => {
+                        this.style.transform = '';
+                        if (this.classList.contains('carousel-nav-vertical')) {
+                            this.style.transform = 'translateX(-50%)';
+                        }
+                    }, 150);
+                });
+            });
             
             // 轮盘导航事件
             carouselPrev.addEventListener('click', previousPhase);
@@ -2207,6 +3331,12 @@
                 ttsSettingsModal.style.display = 'none';
             });
             
+            // 报告模态框事件监听器
+            closeReportBtn.addEventListener('click', () => {
+                reportModal.style.display = 'none';
+                resetTimer(); // 关闭报告时重置计时器
+            });
+            
             // 点击模态框外部关闭
             editPhasesModal.addEventListener('click', (e) => {
                 if (e.target === editPhasesModal) {
@@ -2217,6 +3347,13 @@
             ttsSettingsModal.addEventListener('click', (e) => {
                 if (e.target === ttsSettingsModal) {
                     ttsSettingsModal.style.display = 'none';
+                }
+            });
+            
+            reportModal.addEventListener('click', (e) => {
+                if (e.target === reportModal) {
+                    reportModal.style.display = 'none';
+                    resetTimer(); // 关闭报告时重置计时器
                 }
             });
             
