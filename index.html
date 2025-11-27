@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>运动计时器5.0</title>
+    <title>运动计时器5.5</title>
     <style>
         * {
             margin: 0;
@@ -1035,6 +1035,192 @@
             font-size: 0.9rem;
         }
         
+        /* 新增：历史记录模态框样式 */
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: linear-gradient(145deg, #3a3a3a, #2a2a2a);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            font-size: 1rem;
+        }
+        
+        .history-table th, .history-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #444;
+        }
+        
+        .history-table th {
+            background: linear-gradient(145deg, #4a4a4a, #3a3a3a);
+            color: #fdbb2d;
+            font-weight: bold;
+        }
+        
+        .history-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .history-table tr:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        
+        .history-actions {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .history-actions button {
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            min-width: auto;
+        }
+        
+        .empty-history {
+            text-align: center;
+            padding: 20px;
+            color: #aaa;
+            font-style: italic;
+        }
+        
+        /* 确认对话框样式 */
+        .confirmation-dialog {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 2000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+        
+        .confirmation-dialog.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .confirmation-content {
+            background: linear-gradient(145deg, #2c2c2c, #1f1f1f);
+            border-radius: 15px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            padding: 30px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            border: 1px solid #444;
+        }
+        
+        .confirmation-content h3 {
+            margin-bottom: 20px;
+            color: #fdbb2d;
+        }
+        
+        .confirmation-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .confirmation-buttons button {
+            min-width: 80px;
+        }
+        
+        .confirm-btn {
+            background: linear-gradient(145deg, #4CAF50, #388E3C);
+            color: white;
+        }
+        
+        .cancel-btn {
+            background: linear-gradient(145deg, #F44336, #d32f2f);
+            color: white;
+        }
+        
+        /* 阶段完成确认对话框样式 */
+        .phase-completion-dialog {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 2000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+        
+        .phase-completion-dialog.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .phase-completion-content {
+            background: linear-gradient(145deg, #2c2c2c, #1f1f1f);
+            border-radius: 15px;
+            width: 90%;
+            max-width: 450px;
+            text-align: center;
+            padding: 30px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            border: 1px solid #444;
+        }
+        
+        .phase-completion-content h3 {
+            margin-bottom: 15px;
+            color: #fdbb2d;
+        }
+        
+        .phase-completion-content p {
+            margin-bottom: 20px;
+            color: #e0e0e0;
+        }
+        
+        .phase-completion-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .phase-completion-buttons button {
+            min-width: 100px;
+        }
+        
+        .complete-btn {
+            background: linear-gradient(145deg, #4CAF50, #388E3C);
+            color: white;
+        }
+        
+        .add-time-btn {
+            background: linear-gradient(145deg, #2196F3, #1976D2);
+            color: white;
+        }
+        
+        /* 复制按钮样式 */
+        .copy-log-btn {
+            background: linear-gradient(145deg, #2196F3, #1976D2);
+            color: white;
+            margin-top: 10px;
+        }
+        
+        /* 历史记录按钮样式 */
+        .history-btn {
+            background: linear-gradient(145deg, #9C27B0, #7B1FA2);
+            color: white;
+        }
+        
         /* 移动端优化 */
         @media (max-width: 768px) {
             .container {
@@ -1226,6 +1412,29 @@
             .report-table th, .report-table td {
                 padding: 8px 10px; /* 移动端内边距更小 */
             }
+            
+            /* 移动端历史记录表格字体缩小 */
+            .history-table {
+                font-size: 0.8rem;
+            }
+            
+            .history-table th, .history-table td {
+                padding: 8px 10px;
+            }
+            
+            .history-actions {
+                flex-direction: column;
+                gap: 3px;
+            }
+            
+            .history-actions button {
+                padding: 3px 6px;
+                font-size: 0.7rem;
+            }
+            
+            .confirmation-content, .phase-completion-content {
+                padding: 20px;
+            }
         }
         
         @media (min-width: 769px) {
@@ -1354,12 +1563,56 @@
             .report-table th, .report-table td {
                 padding: 5px 8px;
             }
+            
+            /* 超小屏幕历史记录表格字体更小 */
+            .history-table {
+                font-size: 0.7rem;
+            }
+            
+            .history-table th, .history-table td {
+                padding: 5px 8px;
+            }
         }
     </style>
 </head>
 <body>
     <!-- 自定义通知容器 -->
     <div class="notification-container" id="notificationContainer"></div>
+    
+    <!-- 确认对话框 -->
+    <div class="confirmation-dialog" id="resetConfirmationDialog">
+        <div class="confirmation-content">
+            <h3>确认重置</h3>
+            <p>您确定要重置当前运动计时吗？这将清除所有计时数据。</p>
+            <div class="confirmation-buttons">
+                <button class="confirm-btn" id="confirmResetBtn">确定</button>
+                <button class="cancel-btn" id="cancelResetBtn">取消</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="confirmation-dialog" id="finishConfirmationDialog">
+        <div class="confirmation-content">
+            <h3>确认结束</h3>
+            <p>您确定要结束当前运动计时吗？这将生成运动报告。</p>
+            <div class="confirmation-buttons">
+                <button class="confirm-btn" id="confirmFinishBtn">确定</button>
+                <button class="cancel-btn" id="cancelFinishBtn">取消</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 阶段完成确认对话框 -->
+    <div class="phase-completion-dialog" id="phaseCompletionDialog">
+        <div class="phase-completion-content">
+            <h3 id="phaseCompletionTitle">阶段完成确认</h3>
+            <p id="phaseCompletionMessage">您是否已完成当前阶段的训练？</p>
+            <div class="phase-completion-buttons">
+                <button class="complete-btn" id="completePhaseBtn">是，已完成</button>
+                <button class="add-time-btn" id="addTimePhaseBtn">否，加时1分钟</button>
+            </div>
+        </div>
+    </div>
     
     <div class="container">
         <div class="settings-buttons">
@@ -1368,6 +1621,7 @@
         
         <div class="top-right-buttons">
             <button class="settings-btn" id="ttsSettingsBtn" title="语音设置">🔊</button>
+            <button class="settings-btn" id="historyBtn" title="历史记录">📋</button>
         </div>
         
         <div class="current-time" id="currentTime">当前时间: --:--:--</div>
@@ -1548,7 +1802,43 @@
                 </table>
                 
                 <div class="modal-buttons">
+                    <button id="copyLogBtn" class="copy-log-btn">复制本次日志</button>
                     <button id="closeReportBtn">重置</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 历史记录模态框 -->
+    <div class="modal" id="historyModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>运动历史记录</h2>
+            </div>
+            <div class="modal-body">
+                <div id="historyContainer">
+                    <table class="history-table" id="historyTable">
+                        <thead>
+                            <tr>
+                                <th>日期</th>
+                                <th>开始时间</th>
+                                <th>结束时间</th>
+                                <th>实际用时</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTableBody">
+                            <!-- 历史记录内容将通过JavaScript动态生成 -->
+                        </tbody>
+                    </table>
+                    <div class="empty-history" id="emptyHistoryMessage" style="display: none;">
+                        暂无历史记录
+                    </div>
+                </div>
+                
+                <div class="modal-buttons">
+                    <button id="closeHistoryBtn">关闭</button>
+                    <button id="clearHistoryBtn" class="delete-phase-btn">清空记录</button>
                 </div>
             </div>
         </div>
@@ -1610,7 +1900,7 @@
             { phaseId: 6, timePoint: 255, text: "在每个姿势保持20-30秒，期间进行深长而缓慢的呼吸，用呼气来帮助身体更深地放松。" },
             { phaseId: 6, timePoint: 180, text: "两侧身体都要拉伸，时间保持一致。" },
 
-	// 还剩1分钟语音提示
+            // 还剩1分钟语音提示
             { phaseId: 0, timePoint: 60, text: "热身阶段还剩1分钟" },
             { phaseId: 1, timePoint: 60, text: "休息时间还剩1分钟" },
             { phaseId: 2, timePoint: 60, text: "拳击训练阶段还剩1分钟" },
@@ -1648,11 +1938,13 @@
         // 设置按钮元素
         const editPhasesBtn = document.getElementById('editPhasesBtn');
         const ttsSettingsBtn = document.getElementById('ttsSettingsBtn');
+        const historyBtn = document.getElementById('historyBtn');
         
         // 模态框相关元素
         const editPhasesModal = document.getElementById('editPhasesModal');
         const ttsSettingsModal = document.getElementById('ttsSettingsModal');
         const reportModal = document.getElementById('reportModal');
+        const historyModal = document.getElementById('historyModal');
         const phasesEditContainer = document.getElementById('phasesEditContainer');
         const ttsEditContainer = document.getElementById('ttsEditContainer');
         
@@ -1664,6 +1956,9 @@
         const saveTtsBtn = document.getElementById('saveTtsBtn');
         const cancelTtsBtn = document.getElementById('cancelTtsBtn');
         const closeReportBtn = document.getElementById('closeReportBtn');
+        const copyLogBtn = document.getElementById('copyLogBtn');
+        const closeHistoryBtn = document.getElementById('closeHistoryBtn');
+        const clearHistoryBtn = document.getElementById('clearHistoryBtn');
         
         // 语音设置元素
         const ttsVoiceControls = document.getElementById('ttsVoiceControls');
@@ -1691,6 +1986,25 @@
         
         // 新增：通知容器
         const notificationContainer = document.getElementById('notificationContainer');
+        
+        // 新增：确认对话框元素
+        const resetConfirmationDialog = document.getElementById('resetConfirmationDialog');
+        const finishConfirmationDialog = document.getElementById('finishConfirmationDialog');
+        const confirmResetBtn = document.getElementById('confirmResetBtn');
+        const cancelResetBtn = document.getElementById('cancelResetBtn');
+        const confirmFinishBtn = document.getElementById('confirmFinishBtn');
+        const cancelFinishBtn = document.getElementById('cancelFinishBtn');
+        
+        // 新增：阶段完成确认对话框元素
+        const phaseCompletionDialog = document.getElementById('phaseCompletionDialog');
+        const phaseCompletionTitle = document.getElementById('phaseCompletionTitle');
+        const phaseCompletionMessage = document.getElementById('phaseCompletionMessage');
+        const completePhaseBtn = document.getElementById('completePhaseBtn');
+        const addTimePhaseBtn = document.getElementById('addTimePhaseBtn');
+        
+        // 新增：历史记录元素
+        const historyTableBody = document.getElementById('historyTableBody');
+        const emptyHistoryMessage = document.getElementById('emptyHistoryMessage');
 
         // 初始化变量
         let currentPhase = 0;
@@ -1732,6 +2046,9 @@
         // 新增：加时减时累计记录 - 修复：分别记录加时和减时
         let phaseAddTimeRecords = Array(phases.length).fill(0); // 记录每个阶段的加时累计
         let phaseSubtractTimeRecords = Array(phases.length).fill(0); // 记录每个阶段的减时累计
+
+        // 新增：历史记录存储
+        let trainingHistory = JSON.parse(localStorage.getItem('trainingHistory')) || [];
 
         // 初始化阶段轮盘显示
         function initializePhaseCarousel() {
@@ -2211,36 +2528,66 @@
                     // 播放警告声作为阶段结束提示
                     playWarningSound();
                     
-                    // 记录当前阶段的实际用时
-                    const initialPhaseSeconds = phases[currentPhase].duration + phaseExtraTime[currentPhase];
-                    phaseActualDurations[currentPhase] = initialPhaseSeconds;
-                    phaseActualTimeRecords[currentPhase] = initialPhaseSeconds; // 记录实际用时
+                    // 检查是否为需要确认的阶段（非休息阶段）
+                    const currentPhaseName = phases[currentPhase].name;
+                    const isRestPhase = currentPhaseName.includes("休息");
                     
-                    // 切换到下一个阶段
-                    currentPhase++;
-                    
-                    if (currentPhase >= phases.length) {
-                        // 所有阶段完成
-                        currentPhase = phases.length - 1; // 保持在最后一个阶段
-                        phaseSeconds = 0;
+                    if (!isRestPhase) {
+                        // 非休息阶段：暂停计时并显示确认对话框
+                        pauseTimer();
                         
-                        // 自动停止计时
-                        finishTraining();
+                        // 设置确认对话框内容
+                        phaseCompletionTitle.textContent = `${currentPhaseName}完成确认`;
+                        phaseCompletionMessage.textContent = `您是否已完成${currentPhaseName}？`;
+                        
+                        // 显示确认对话框
+                        phaseCompletionDialog.classList.add('active');
                     } else {
-                        // 记录新阶段的开始时间
-                        phaseStartTimes[currentPhase] = totalSeconds;
-                        
-                        // 重置阶段时间
-                        phaseSeconds = phases[currentPhase].duration + phaseExtraTime[currentPhase];
-                        
-                        // 重置新阶段的经过时间
-                        phaseElapsedTime[currentPhase] = 0;
+                        // 休息阶段：直接进入下一阶段
+                        proceedToNextPhase();
                     }
                 }
                 
                 // 检查是否需要播放警告声（阶段切换前3秒）
                 if (phaseSeconds <= 3 && phaseSeconds > 0) {
                     playWarningSound();
+                }
+            }
+            
+            // 更新显示
+            updatePhaseDisplay();
+        }
+
+        // 继续到下一阶段
+        function proceedToNextPhase() {
+            // 记录当前阶段的实际用时
+            const initialPhaseSeconds = phases[currentPhase].duration + phaseExtraTime[currentPhase];
+            phaseActualDurations[currentPhase] = initialPhaseSeconds;
+            phaseActualTimeRecords[currentPhase] = initialPhaseSeconds; // 记录实际用时
+            
+            // 切换到下一个阶段
+            currentPhase++;
+            
+            if (currentPhase >= phases.length) {
+                // 所有阶段完成
+                currentPhase = phases.length - 1; // 保持在最后一个阶段
+                phaseSeconds = 0;
+                
+                // 自动停止计时
+                finishTraining();
+            } else {
+                // 记录新阶段的开始时间
+                phaseStartTimes[currentPhase] = totalSeconds;
+                
+                // 重置阶段时间
+                phaseSeconds = phases[currentPhase].duration + phaseExtraTime[currentPhase];
+                
+                // 重置新阶段的经过时间
+                phaseElapsedTime[currentPhase] = 0;
+                
+                // 如果计时器是暂停状态，则恢复计时
+                if (isPaused) {
+                    startTimer();
                 }
             }
             
@@ -2365,8 +2712,7 @@
 
         // 加时功能 - 修复：正确记录加时时间
         function addTime() {
-            if (!isRunning) return;
-            
+            // if (!isRunning) return;
             
             // 为当前阶段增加1分钟
             phaseExtraTime[currentPhase] += 60;
@@ -2490,6 +2836,127 @@
             
             // 显示烟花庆祝效果
             createFireworks();
+            
+            // 保存训练记录到历史
+            saveTrainingRecord();
+        }
+
+        // 保存训练记录到历史
+        function saveTrainingRecord() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const date = `${year}-${month}-${day}`;
+            
+            // 计算运动计划时间（所有阶段时间之和）
+            let plannedTime = 0;
+            for (let i = 0; i < phases.length; i++) {
+                plannedTime += phases[i].duration;
+            }
+            
+            // 实际运动时间使用总计时记录的时间
+            let actualTime = totalSeconds;
+            
+            // 计算总计加时时间
+            let totalExtraTime = phaseAddTimeRecords.reduce((sum, time) => sum + time, 0);
+            
+            // 计算总计减时时间
+            let totalSubtractTime = phaseSubtractTimeRecords.reduce((sum, time) => sum + time, 0);
+            
+            // 计算总计暂停时间
+            let totalPauseTime = phasePauseTimes.reduce((sum, time) => sum + time, 0);
+            
+            // 计算完成程度
+            const totalTimeDiff = actualTime - plannedTime;
+            const totalTimeDiffMinutes = Math.abs(totalTimeDiff) / 60;
+            
+            let totalPerformanceText;
+            
+            if (actualTime < 60) {
+                totalPerformanceText = "未训练";
+            } else if (totalTimeDiff >= 0) {
+                // 实际用时大于计划用时
+                if (totalTimeDiffMinutes <= 1) {
+                    totalPerformanceText = "优秀";
+                } else if (totalTimeDiffMinutes <= 3) {
+                    totalPerformanceText = "勉强";
+                } else if (totalTimeDiffMinutes <= 8) {
+                    totalPerformanceText = "吃力";
+                } else {
+                    totalPerformanceText = "超强度";
+                }
+            } else {
+                // 实际用时小于计划用时
+                if (totalTimeDiffMinutes <= 1) {
+                    totalPerformanceText = "优秀";
+                } else if (totalTimeDiffMinutes <= 3) {
+                    totalPerformanceText = "一般";
+                } else {
+                    totalPerformanceText = "缩减版";
+                }
+            }
+            
+            // 创建训练记录
+            const trainingRecord = {
+                id: Date.now(), // 使用时间戳作为唯一ID
+                date: date,
+                startTime: startTimestamp ? startTimestamp.toLocaleTimeString() : '--:--:--',
+                endTime: endTimestamp ? endTimestamp.toLocaleTimeString() : '--:--:--',
+                plannedTime: formatTime(plannedTime),
+                actualTime: formatTime(actualTime),
+                totalExtraTime: formatTime(totalExtraTime),
+                totalSubtractTime: formatTime(totalSubtractTime),
+                totalPauseTime: formatTime(totalPauseTime),
+                totalPerformance: totalPerformanceText,
+                phases: phases.map((phase, index) => ({
+                    name: phase.name,
+                    plannedTime: formatTime(phase.duration),
+                    actualTime: formatTime(phaseActualTimeRecords[index] || phaseElapsedTime[index]),
+                    extraTime: formatTime(phaseAddTimeRecords[index]),
+                    subtractTime: formatTime(phaseSubtractTimeRecords[index]),
+                    pauseTime: formatTime(phasePauseTimes[index]),
+                    performance: calculatePerformance(phase, index)
+                }))
+            };
+            
+            // 添加到历史记录
+            trainingHistory.unshift(trainingRecord);
+            
+            // 保存到本地存储
+            localStorage.setItem('trainingHistory', JSON.stringify(trainingHistory));
+        }
+
+        // 计算阶段完成程度
+        function calculatePerformance(phase, index) {
+            const actualDuration = phaseActualTimeRecords[index] || phaseElapsedTime[index];
+            const plannedDuration = phase.duration;
+            const timeDiff = actualDuration - plannedDuration;
+            const timeDiffMinutes = Math.abs(timeDiff) / 60;
+            
+            if (actualDuration < 60) {
+                return "未训练";
+            } else if (timeDiff >= 0) {
+                // 实际用时大于计划用时
+                if (timeDiffMinutes <= 1) {
+                    return "优秀";
+                } else if (timeDiffMinutes <= 3) {
+                    return "勉强";
+                } else if (timeDiffMinutes <= 8) {
+                    return "吃力";
+                } else {
+                    return "超强度";
+                }
+            } else {
+                // 实际用时小于计划用时
+                if (timeDiffMinutes <= 1) {
+                    return "优秀";
+                } else if (timeDiffMinutes <= 3) {
+                    return "一般";
+                } else {
+                    return "缩减版";
+                }
+            }
         }
 
         // 将时间字符串转换为秒数
@@ -2740,6 +3207,299 @@
             
             // 显示报告模态框
             reportModal.style.display = 'flex';
+        }
+
+        // 生成日志文本
+        function generateLogText() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const date = `${year}年${month}月${day}日`;
+            
+            // 计算运动计划时间（所有阶段时间之和）
+            let plannedTime = 0;
+            for (let i = 0; i < phases.length; i++) {
+                plannedTime += phases[i].duration;
+            }
+            
+            // 实际运动时间使用总计时记录的时间
+            let actualTime = totalSeconds;
+            
+            // 计算总计加时时间
+            let totalExtraTime = phaseAddTimeRecords.reduce((sum, time) => sum + time, 0);
+            
+            // 计算总计减时时间
+            let totalSubtractTime = phaseSubtractTimeRecords.reduce((sum, time) => sum + time, 0);
+            
+            // 计算总计暂停时间
+            let totalPauseTime = phasePauseTimes.reduce((sum, time) => sum + time, 0);
+            
+            // 计算完成程度
+            const totalTimeDiff = actualTime - plannedTime;
+            const totalTimeDiffMinutes = Math.abs(totalTimeDiff) / 60;
+            
+            let totalPerformanceText;
+            
+            if (actualTime < 60) {
+                totalPerformanceText = "未训练";
+            } else if (totalTimeDiff >= 0) {
+                // 实际用时大于计划用时
+                if (totalTimeDiffMinutes <= 1) {
+                    totalPerformanceText = "优秀";
+                } else if (totalTimeDiffMinutes <= 3) {
+                    totalPerformanceText = "勉强";
+                } else if (totalTimeDiffMinutes <= 8) {
+                    totalPerformanceText = "吃力";
+                } else {
+                    totalPerformanceText = "超强度";
+                }
+            } else {
+                // 实际用时小于计划用时
+                if (totalTimeDiffMinutes <= 1) {
+                    totalPerformanceText = "优秀";
+                } else if (totalTimeDiffMinutes <= 3) {
+                    totalPerformanceText = "一般";
+                } else {
+                    totalPerformanceText = "缩减版";
+                }
+            }
+            
+            let logText = `# 运动日志 - ${date}\n`;
+            logText += `开始时间: ${startTimestamp ? startTimestamp.toLocaleTimeString() : '--:--:--'}\n`;
+            logText += `结束时间: ${endTimestamp ? endTimestamp.toLocaleTimeString() : '--:--:--'}\n`;
+            logText += `总计划时间: ${formatTime(plannedTime)}\n`;
+            logText += `实际运动时间: ${formatTime(actualTime)}\n\n`;
+            logText += `【总计：计划用时 ${formatTime(plannedTime)}, 实际用时 ${formatTime(actualTime)}, 加时时间 ${formatTime(totalExtraTime)}, 减时时间 ${formatTime(totalSubtractTime)}, 暂停时间 ${formatTime(totalPauseTime)}, 完成程度 ${totalPerformanceText}】\n\n`;
+            logText += `各阶段详情:\n`;
+            
+            for (let i = 0; i < phases.length; i++) {
+                const phase = phases[i];
+                const actualDuration = phaseActualTimeRecords[i] > 0 ? phaseActualTimeRecords[i] : phaseElapsedTime[i];
+                const extraTime = phaseAddTimeRecords[i];
+                const subtractTime = phaseSubtractTimeRecords[i];
+                const pauseTime = phasePauseTimes[i];
+                const performance = calculatePerformance(phase, i);
+                
+                logText += `${phase.name}：计划用时 ${formatTime(phase.duration)}, 实际用时 ${formatTime(actualDuration)}, 加时时间 ${formatTime(extraTime)}, 减时时间 ${formatTime(subtractTime)}, 暂停时间 ${formatTime(pauseTime)}, 完成程度 ${performance}\n`;
+            }
+            
+            return logText;
+        }
+
+        // 复制日志到剪贴板
+        function copyLogToClipboard() {
+            const logText = generateLogText();
+            
+            navigator.clipboard.writeText(logText).then(() => {
+                showNotification("复制成功", "运动日志已复制到剪贴板", "info");
+            }).catch(err => {
+                console.error('复制失败: ', err);
+                showNotification("复制失败", "无法复制到剪贴板，请手动复制", "warning");
+            });
+        }
+
+        // 显示历史记录
+        function showHistory() {
+            // 检查计时器是否在运行中
+            if (isRunning || isPaused) {
+                showNotification("计时器运行中", "计时器运行中，请结束或重置计时器后查看。", "warning");
+                return;
+            }
+
+            historyTableBody.innerHTML = '';
+            
+            if (trainingHistory.length === 0) {
+                emptyHistoryMessage.style.display = 'block';
+            } else {
+                emptyHistoryMessage.style.display = 'none';
+                
+                trainingHistory.forEach(record => {
+                    const row = document.createElement('tr');
+                    
+                    // 日期
+                    const dateCell = document.createElement('td');
+                    dateCell.textContent = record.date;
+                    
+                    // 开始时间
+                    const startTimeCell = document.createElement('td');
+                    startTimeCell.textContent = record.startTime;
+                    
+                    // 结束时间
+                    const endTimeCell = document.createElement('td');
+                    endTimeCell.textContent = record.endTime;
+                    
+                    // 实际用时
+                    const actualTimeCell = document.createElement('td');
+                    actualTimeCell.textContent = record.actualTime;
+                    
+                    // 操作
+                    const actionsCell = document.createElement('td');
+                    actionsCell.className = 'history-actions';
+                    
+                    const viewBtn = document.createElement('button');
+                    viewBtn.textContent = '查看';
+                    viewBtn.className = 'history-btn';
+                    viewBtn.addEventListener('click', () => {
+                        viewTrainingRecord(record);
+                    });
+                    
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.textContent = '删除';
+                    deleteBtn.className = 'delete-phase-btn';
+                    deleteBtn.addEventListener('click', () => {
+                        deleteTrainingRecord(record.id);
+                    });
+                    
+                    actionsCell.appendChild(viewBtn);
+                    actionsCell.appendChild(deleteBtn);
+                    
+                    row.appendChild(dateCell);
+                    row.appendChild(startTimeCell);
+                    row.appendChild(endTimeCell);
+                    row.appendChild(actualTimeCell);
+                    row.appendChild(actionsCell);
+                    
+                    historyTableBody.appendChild(row);
+                });
+            }
+            
+            historyModal.style.display = 'flex';
+        }
+
+        // 查看训练记录
+        function viewTrainingRecord(record) {
+            // 更新报告标题
+            reportTitle.textContent = `${record.date} 运动执行情况报告`;
+            
+            // 更新报告摘要
+            document.getElementById('reportStartTime').textContent = record.startTime;
+            document.getElementById('reportEndTime').textContent = record.endTime;
+            document.getElementById('reportPlannedTime').textContent = record.plannedTime;
+            document.getElementById('reportActualTime').textContent = record.actualTime;
+            
+            // 更新报告表格
+            const reportTableBody = document.getElementById('reportTableBody');
+            reportTableBody.innerHTML = '';
+            
+            // 添加总计行
+            const totalRow = document.createElement('tr');
+            totalRow.className = 'total-row';
+            
+            const totalNameCell = document.createElement('td');
+            totalNameCell.textContent = '总计';
+            
+            const totalPlannedCell = document.createElement('td');
+            totalPlannedCell.textContent = record.plannedTime;
+            
+            const totalActualCell = document.createElement('td');
+            totalActualCell.textContent = record.actualTime;
+            totalActualCell.classList.add('actual-time-purple');
+            
+            const totalExtraCell = document.createElement('td');
+            totalExtraCell.textContent = record.totalExtraTime !== "00:00" ? record.totalExtraTime : '-';
+            if (record.totalExtraTime !== "00:00") {
+                totalExtraCell.classList.add('extra-time-red');
+            }
+            
+            const totalSubtractCell = document.createElement('td');
+            totalSubtractCell.textContent = record.totalSubtractTime !== "00:00" ? '-' + record.totalSubtractTime : '-';
+            if (record.totalSubtractTime !== "00:00") {
+                totalSubtractCell.classList.add('subtract-time-green');
+            }
+            
+            const totalPauseCell = document.createElement('td');
+            totalPauseCell.textContent = record.totalPauseTime !== "00:00" ? record.totalPauseTime : '-';
+            
+            const totalPerformanceCell = document.createElement('td');
+            totalPerformanceCell.textContent = record.totalPerformance;
+            
+            totalRow.appendChild(totalNameCell);
+            totalRow.appendChild(totalPlannedCell);
+            totalRow.appendChild(totalActualCell);
+            totalRow.appendChild(totalExtraCell);
+            totalRow.appendChild(totalSubtractCell);
+            totalRow.appendChild(totalPauseCell);
+            totalRow.appendChild(totalPerformanceCell);
+            
+            reportTableBody.appendChild(totalRow);
+            
+            // 添加各阶段行
+            record.phases.forEach(phase => {
+                const row = document.createElement('tr');
+                
+                // 阶段名称
+                const nameCell = document.createElement('td');
+                nameCell.textContent = phase.name;
+                
+                // 计划用时
+                const plannedCell = document.createElement('td');
+                plannedCell.textContent = phase.plannedTime;
+                
+                // 实际用时
+                const actualCell = document.createElement('td');
+                actualCell.textContent = phase.actualTime;
+                actualCell.classList.add('actual-time-purple');
+                
+                // 加时时间
+                const extraCell = document.createElement('td');
+                extraCell.textContent = phase.extraTime !== "00:00" ? phase.extraTime : '-';
+                if (phase.extraTime !== "00:00") {
+                    extraCell.classList.add('extra-time-red');
+                }
+                
+                // 减时时间
+                const subtractCell = document.createElement('td');
+                subtractCell.textContent = phase.subtractTime !== "00:00" ? '-' + phase.subtractTime : '-';
+                if (phase.subtractTime !== "00:00") {
+                    subtractCell.classList.add('subtract-time-green');
+                }
+                
+                // 暂停时间
+                const pauseCell = document.createElement('td');
+                pauseCell.textContent = phase.pauseTime !== "00:00" ? phase.pauseTime : '-';
+                
+                // 完成程度
+                const performanceCell = document.createElement('td');
+                performanceCell.textContent = phase.performance;
+                
+                row.appendChild(nameCell);
+                row.appendChild(plannedCell);
+                row.appendChild(actualCell);
+                row.appendChild(extraCell);
+                row.appendChild(subtractCell);
+                row.appendChild(pauseCell);
+                row.appendChild(performanceCell);
+                
+                reportTableBody.appendChild(row);
+            });
+            
+            // 隐藏历史记录模态框，显示报告模态框
+            historyModal.style.display = 'none';
+            reportModal.style.display = 'flex';
+        }
+
+        // 删除训练记录
+        function deleteTrainingRecord(id) {
+            trainingHistory = trainingHistory.filter(record => record.id !== id);
+            localStorage.setItem('trainingHistory', JSON.stringify(trainingHistory));
+            showHistory(); // 刷新历史记录显示
+            showNotification("删除成功", "训练记录已删除", "info");
+        }
+
+        // 清空历史记录
+        function clearHistory() {
+            if (trainingHistory.length === 0) {
+                showNotification("清空记录", "没有可清空的记录", "info");
+                return;
+            }
+            
+            if (confirm("确定要清空所有历史记录吗？此操作不可撤销。")) {
+                trainingHistory = [];
+                localStorage.setItem('trainingHistory', JSON.stringify(trainingHistory));
+                showHistory(); // 刷新历史记录显示
+                showNotification("清空成功", "所有历史记录已清空", "info");
+            }
         }
 
         // 自定义通知函数
@@ -3251,11 +4011,52 @@
                 initializeAudio();
                 startCountdown();
             });
+            
             pauseBtn.addEventListener('click', pauseTimer);
-            resetBtn.addEventListener('click', resetTimer);
+            
+            resetBtn.addEventListener('click', () => {
+                // 显示重置确认对话框
+                resetConfirmationDialog.classList.add('active');
+            });
+            
+            finishBtn.addEventListener('click', () => {
+                // 显示结束确认对话框
+                finishConfirmationDialog.classList.add('active');
+            });
+            
             addTimeBtn.addEventListener('click', addTime);
             subtractTimeBtn.addEventListener('click', subtractTime);
-            finishBtn.addEventListener('click', finishTraining);
+            
+            // 确认对话框按钮事件
+            confirmResetBtn.addEventListener('click', () => {
+                resetConfirmationDialog.classList.remove('active');
+                resetTimer();
+            });
+            
+            cancelResetBtn.addEventListener('click', () => {
+                resetConfirmationDialog.classList.remove('active');
+            });
+            
+            confirmFinishBtn.addEventListener('click', () => {
+                finishConfirmationDialog.classList.remove('active');
+                finishTraining();
+            });
+            
+            cancelFinishBtn.addEventListener('click', () => {
+                finishConfirmationDialog.classList.remove('active');
+            });
+            
+            // 阶段完成确认对话框按钮事件
+            completePhaseBtn.addEventListener('click', () => {
+                phaseCompletionDialog.classList.remove('active');
+                proceedToNextPhase();
+            });
+
+            addTimePhaseBtn.addEventListener('click', () => {
+                phaseCompletionDialog.classList.remove('active');
+                addTime();
+                startTimer();
+            });
             
             // 为按钮添加点击反馈效果
             const controlButtons = document.querySelectorAll('#subtractTimeBtn, #addTimeBtn, #startBtn, #pauseBtn, #resetBtn, #finishBtn');
@@ -3316,6 +4117,7 @@
             // 设置按钮事件监听器
             editPhasesBtn.addEventListener('click', openEditPhasesModal);
             ttsSettingsBtn.addEventListener('click', openTtsSettingsModal);
+            historyBtn.addEventListener('click', showHistory);
             
             // 阶段编辑模态框事件监听器
             addPhaseBtn.addEventListener('click', addNewPhase);
@@ -3332,10 +4134,18 @@
             });
             
             // 报告模态框事件监听器
+            copyLogBtn.addEventListener('click', copyLogToClipboard);
             closeReportBtn.addEventListener('click', () => {
                 reportModal.style.display = 'none';
                 resetTimer(); // 关闭报告时重置计时器
             });
+            
+            // 历史记录模态框事件监听器
+            closeHistoryBtn.addEventListener('click', () => {
+                historyModal.style.display = 'none';
+            });
+            
+            clearHistoryBtn.addEventListener('click', clearHistory);
             
             // 点击模态框外部关闭
             editPhasesModal.addEventListener('click', (e) => {
@@ -3354,6 +4164,12 @@
                 if (e.target === reportModal) {
                     reportModal.style.display = 'none';
                     resetTimer(); // 关闭报告时重置计时器
+                }
+            });
+            
+            historyModal.addEventListener('click', (e) => {
+                if (e.target === historyModal) {
+                    historyModal.style.display = 'none';
                 }
             });
             
